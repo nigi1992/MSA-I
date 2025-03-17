@@ -126,6 +126,107 @@ head(df_vdem$diffusion_2015)
 summary(df_vdem$diffusion_2015)
 
 # try diffusion variable with distance threshold. which distance? for threshold?
+summary(distance_matrix_vdem)
+# average of average
+mean(distance_matrix_vdem)
+median(distance_matrix_vdem)
+min(distance_matrix_vdem)
+max(distance_matrix_vdem)
+# The distance matrix shows that the average distance is 5,000 km.
+
+# Diffusion Variable for V-Dem with Distance Threshold and Combo with exponential decay----------------------
+
+## trying with distance threshold
+# Computing inverse distance weights (excluding self-distance)
+inverse_distance_vdem2 <- 1 / (distance_matrix_vdem + 1)  # Adding 1 to avoid division by zero
+diag(inverse_distance_vdem2) <- 0  # Setting diagonal (self-distance) to 0
+
+# Setting a distance threshold of 5000 km
+inverse_distance_vdem2[distance_matrix_vdem > 5000] <- 0
+
+# Defining time frame for diffusion variable
+years_vdem <- 2015:2023
+
+df_vdem2 <- df_vdem
+
+# Looping through each year
+for (year in years_vdem) {
+  # Generating correct column name 
+  v_dem_col <- paste0(year, "V_Dem")
+  
+  # Extracting democracy scores as a numeric vector
+  v_dem_scores <- df_vdem[[v_dem_col]]
+  
+  # Computing weighted average (ensures matrices are numeric)
+  weighted_sum_vdem2 <- inverse_distance_vdem2 %*% v_dem_scores
+  total_weights_vdem2 <- rowSums(inverse_distance_vdem2)
+  
+  # Adding diffusion variable with proper naming 
+  df_vdem2 <- df_vdem2 %>%
+    mutate(
+      !!paste0("diffusion2_", year) := as.numeric(weighted_sum_vdem2 / total_weights_vdem2)
+    )
+}
+head(df_vdem2$diffusion_2015)
+head(df_vdem2$diffusion2_2015)
+summary(df_vdem2$diffusion_2015)
+summary(df_vdem2$diffusion2_2015)
+
+# The diffusion variable with a distance threshold of 4500 km seems to have a lower mean and median compared to the original diffusion variable.
+
+## With distance threshold and exponential decay
+
+# Distance threshold for very remote islands
+distance_threshold <- 5000
+
+# Exponential decay parameter
+lambda <- 0.001
+
+# Option 1: Computing inverse distance weights with distance threshold and exponential decay
+inverse_distance_vdem3 <- ifelse(
+  distance_matrix_vdem > distance_threshold, 
+  0,  # Setting weight to 0 if distance exceeds threshold
+  exp(-lambda * distance_matrix_vdem)  # Applying exponential decay
+)
+
+# Option 2: Computing inverse distance weights with only exponential decay
+lambda <- 0.001
+inverse_distance_vdem3 <- exp(-lambda * distance_matrix_vdem)  # Applying exponential decay
+
+
+# Excluding self-distance
+diag(inverse_distance_vdem3) <- 0  # Setting diagonal (self-distance) to 0
+
+# Defining time frame for diffusion variable
+years_vdem <- 2015:2023
+
+df_vdem3 <- df_vdem2
+
+# Looping through each year
+for (year in years_vdem) {
+  # Generating correct column name 
+  v_dem_col <- paste0(year, "V_Dem")
+  
+  # Extracting democracy scores as a numeric vector
+  v_dem_scores <- df_vdem[[v_dem_col]]
+  
+  # Computing weighted average (ensures matrices are numeric)
+  weighted_sum_vdem3 <- inverse_distance_vdem3 %*% v_dem_scores
+  total_weights_vdem3 <- rowSums(inverse_distance_vdem3)
+  
+  # Adding diffusion variable with proper naming 
+  df_vdem3 <- df_vdem3 %>%
+    mutate(
+      !!paste0("diffusion3_", year) := as.numeric(weighted_sum_vdem3 / total_weights_vdem3)
+    )
+}
+
+head(df_vdem3$diffusion_2015)
+head(df_vdem3$diffusion2_2015)
+head(df_vdem3$diffusion3_2015)
+summary(df_vdem3$diffusion_2015)
+summary(df_vdem3$diffusion2_2015)
+summary(df_vdem3$diffusion3_2015)
 
 # 6. Dealing with missing values for V-Dem -----------------------------------------------------------------------
 
@@ -139,7 +240,6 @@ sum(is.na(df_vdem$GDPpc2023))
 # **Next Steps:**
 # **1. Finally choose Countries, Year(s), the IVs (Pop_log or Pop_cat) and the DVs (V-Dem u/o FH) for the analysis!!!**
 #   (What about HK and Taiwan?) -> leave for now, maybe remove later!
-# **2. Remove NAs from all chosen IV, DV and CVs**
 # **3. Transformation of all the chosen variables?** -> no string/characters, only numeric variables
 # **4. Log transformation of Pop and GDPpc** 
 
@@ -177,9 +277,36 @@ df_vdem$Pop_log_2023 <- log(df_vdem$Pop_2023)
 # I also want to create a categorical variable for population
 #	Micro (<1'000'000), Small (between 1'000'000 - 10'000'000), Large (between 10'000'000 and 100'000'000), and Huge (>100'000'000)
 df_vdem$Pop_cat_2015 <- cut(df_vdem$Pop_2015, breaks = c(0, 1e6, 1e7, 1e8, Inf), labels = c("Micro", "Small", "Large", "Huge"))
+summary(df_vdem$Pop_cat_2015)
+df_vdem$Pop_cat_2016 <- cut(df_vdem$Pop_2016, breaks = c(0, 1e6, 1e7, 1e8, Inf), labels = c("Micro", "Small", "Large", "Huge"))
+df_vdem$Pop_cat_2017 <- cut(df_vdem$Pop_2017, breaks = c(0, 1e6, 1e7, 1e8, Inf), labels = c("Micro", "Small", "Large", "Huge"))
+df_vdem$Pop_cat_2018 <- cut(df_vdem$Pop_2018, breaks = c(0, 1e6, 1e7, 1e8, Inf), labels = c("Micro", "Small", "Large", "Huge"))
+df_vdem$Pop_cat_2019 <- cut(df_vdem$Pop_2019, breaks = c(0, 1e6, 1e7, 1e8, Inf), labels = c("Micro", "Small", "Large", "Huge"))
+df_vdem$Pop_cat_2020 <- cut(df_vdem$Pop_2020, breaks = c(0, 1e6, 1e7, 1e8, Inf), labels = c("Micro", "Small", "Large", "Huge"))
+df_vdem$Pop_cat_2021 <- cut(df_vdem$Pop_2021, breaks = c(0, 1e6, 1e7, 1e8, Inf), labels = c("Micro", "Small", "Large", "Huge"))
+df_vdem$Pop_cat_2022 <- cut(df_vdem$Pop_2022, breaks = c(0, 1e6, 1e7, 1e8, Inf), labels = c("Micro", "Small", "Large", "Huge"))
+summary(df_vdem$Pop_cat_2022)
+df_vdem$Pop_cat_2023 <- cut(df_vdem$Pop_2023, breaks = c(0, 1e6, 1e7, 1e8, Inf), labels = c("Micro", "Small", "Large", "Huge"))
+
+# Transform into ordered factors for Ordered Logistic Regression
+#install.packages("MASS")
+library(MASS)
+# converting 'Status' to an ordered factor
+df_vdem$Pop_cat_2015 <- factor(df_vdem$Pop_cat_2015, levels = c('Micro', 'Small', 'Large', 'Huge'), ordered = TRUE)
+levels(df_vdem$Pop_cat_2015)
+df_vdem$Pop_cat_2016 <- factor(df_vdem$Pop_cat_2016, levels = c('Micro', 'Small', 'Large', 'Huge'), ordered = TRUE)
+df_vdem$Pop_cat_2017 <- factor(df_vdem$Pop_cat_2017, levels = c('Micro', 'Small', 'Large', 'Huge'), ordered = TRUE)
+df_vdem$Pop_cat_2018 <- factor(df_vdem$Pop_cat_2018, levels = c('Micro', 'Small', 'Large', 'Huge'), ordered = TRUE)
+df_vdem$Pop_cat_2019 <- factor(df_vdem$Pop_cat_2019, levels = c('Micro', 'Small', 'Large', 'Huge'), ordered = TRUE)
+df_vdem$Pop_cat_2020 <- factor(df_vdem$Pop_cat_2020, levels = c('Micro', 'Small', 'Large', 'Huge'), ordered = TRUE)
+df_vdem$Pop_cat_2021 <- factor(df_vdem$Pop_cat_2021, levels = c('Micro', 'Small', 'Large', 'Huge'), ordered = TRUE)
+df_vdem$Pop_cat_2022 <- factor(df_vdem$Pop_cat_2022, levels = c('Micro', 'Small', 'Large', 'Huge'), ordered = TRUE)
+levels(df_vdem$Pop_cat_2022)
+df_vdem$Pop_cat_2023 <- factor(df_vdem$Pop_cat_2023, levels = c('Micro', 'Small', 'Large', 'Huge'), ordered = TRUE)
 
 # GDPpc Variable also has very large range, need to apply log transformation
 df_vdem$GDPpc_log_2015 <- log(df_vdem$GDPpc2015)
+summary(df_vdem$GDPpc_log_2015)
 df_vdem$GDPpc_log_2016 <- log(df_vdem$GDPpc2016)
 df_vdem$GDPpc_log_2017 <- log(df_vdem$GDPpc2017)
 df_vdem$GDPpc_log_2018 <- log(df_vdem$GDPpc2018)
@@ -187,8 +314,75 @@ df_vdem$GDPpc_log_2019 <- log(df_vdem$GDPpc2019)
 df_vdem$GDPpc_log_2020 <- log(df_vdem$GDPpc2020)
 df_vdem$GDPpc_log_2021 <- log(df_vdem$GDPpc2021)
 df_vdem$GDPpc_log_2022 <- log(df_vdem$GDPpc2022)
+summary(df_vdem$GDPpc_log_2022)
 df_vdem$GDPpc_log_2023 <- log(df_vdem$GDPpc2023)
 
+# Creating dummy variables for regions
+df_vdem <- df_vdem %>%
+  mutate(
+    Asia = ifelse(region == "Asia", 1, 0),
+    Americas = ifelse(region == "Americas", 1, 0),
+    Africa = ifelse(region == "Africa", 1, 0),
+    Europe = ifelse(region == "Europe", 1, 0),
+    Oceania = ifelse(region == "Oceania", 1, 0)
+  )
+
+# Creating dummy variables for culture
+unique(df_vdem$culture)
+table(df_vdem$culture)
+
+df_vdem <- df_vdem %>%
+  mutate(
+    carribbean = ifelse(culture == "Carribbean", 1, 0),
+    pacific_island = ifelse(culture == "Pacific Island", 1, 0),
+    eastern_europe = ifelse(culture == "Eastern European", 1, 0),
+    north_america = ifelse(culture == "North American", 1, 0),
+    east_asia = ifelse(culture == "East Asia", 1, 0),
+    nordic = ifelse(culture == "Nordic", 1, 0),
+    mediterranean = ifelse(culture == "Mediterranean", 1, 0),
+    not_defined = ifelse(culture == "Not Defined", 1, 0)
+  )
+
+# Creating dummy variables for sub-regions
+# Unique values for sub_region
+unique(df_vdem$sub_region)
+table(df_vdem$sub_region)
+df_vdem <- df_vdem %>%
+  mutate(
+    srNorth_Africa = ifelse(sub_region == "North Africa", 1, 0),
+    srSouthern_Africa = ifelse(sub_region == "Southern Africa", 1, 0),
+    srWest_Africa = ifelse(sub_region == "West Africa", 1, 0),
+    srEast_Africa = ifelse(sub_region == "East Africa", 1, 0),
+    srCentral_Africa = ifelse(sub_region == "Central Africa", 1, 0),
+    srEast_Asia = ifelse(sub_region == "East Asia", 1, 0),
+    srSouth_Asia = ifelse(sub_region == "South Asia", 1, 0),
+    srSoutheast_Asia = ifelse(sub_region == "Southeast Asia", 1, 0),
+    srCaucasus = ifelse(sub_region == "Caucasus", 1, 0),
+    srCentral_Asia = ifelse(sub_region == "Central Asia", 1, 0),
+    srMiddle_East = ifelse(sub_region == "Middle East", 1, 0),
+    srEast_Central_Europe = ifelse(sub_region == "East-Central Europe", 1, 0),
+    srNordic = ifelse(sub_region == "Nordic", 1, 0),
+    srSouthern_Europe = ifelse(sub_region == "Southern Europe", 1, 0),
+    srWestern_Europe = ifelse(sub_region == "Western Europe", 1, 0),
+    srNorth_America = ifelse(sub_region == "North America", 1, 0),
+    srCarribbean = ifelse(sub_region == "Carribbean", 1, 0),
+    srCentral_America = ifelse(sub_region == "Central America", 1, 0),
+    srSouth_America = ifelse(sub_region == "South America", 1, 0),
+    srOceania = ifelse(sub_region == "Oceania", 1, 0)
+  )
+
+
+# Filtering final df for Regression ---------------------------------------------
+df_vdem_filtered <- df_vdem %>%
+  select(-c(iso2, region, sub_region, culture, area, dis_int, city_en, lat, lon, `commu _pre_dis_ussr`, V_Dem, FH, `C/T`, Pop, `GDP_pc_PPP_const_2021$`, V_Dem_Scores))
+
+colSums(is.na(df_vdem_filtered)) # Showing NAs of all columns
+colnames(df_vdem_filtered)[colSums(is.na(df_vdem_filtered)) > 0]
+str(df_vdem_filtered)
+
+# Saving df as csv file
+file_path_vdem <- '/Users/nicolaswaser/New-project-GitHub-first/R/MSA I/Input Data/df_vdem_filtered.csv'
+write.csv(df_vdem_filtered, file_path_vdem, row.names = FALSE)
 # Data Frame for FH -------------------------------------------------------
 
 df_fh <- df1_impute
