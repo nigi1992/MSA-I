@@ -122,10 +122,18 @@ for (year in years_vdem) {
       !!paste0("diffusion_", year) := as.numeric(weighted_sum_vdem / total_weights_vdem)
     )
 }
-head(df_vdem)
+head(df_vdem$diffusion_2015)
+summary(df_vdem$diffusion_2015)
 
+# try diffusion variable with distance threshold. which distance? for threshold?
 
 # 6. Dealing with missing values for V-Dem -----------------------------------------------------------------------
+
+colSums(is.na(df_vdem)) # Showing NAs of all columns
+colnames(df_vdem)[colSums(is.na(df_vdem)) > 0] # Showing columns with NAs
+sum(is.na(df_vdem$GDPpc2023))
+# There is 3 NA in GDPpc2023, which is the only column with NAs.
+# **I could impute or research them, but instead, I will choose to pick the year 2022 for my analysis instead.**
 
 
 # **Next Steps:**
@@ -134,7 +142,6 @@ head(df_vdem)
 # **2. Remove NAs from all chosen IV, DV and CVs**
 # **3. Transformation of all the chosen variables?** -> no string/characters, only numeric variables
 # **4. Log transformation of Pop and GDPpc** 
-
 
 # 7. Variable Transformation for V-Dem ---------------------------------------
 
@@ -152,6 +159,35 @@ class(df_vdem$GDPpc2015)
 class(df_vdem$island_state)
 class(df_vdem$landlocked)
 class(df_vdem$MENA)
+# all relevant variables are numeric, no transformation needed
+
+# Population Variable on the other hand has very large range, need to apply log transformation
+df_vdem$Pop_log_2015 <- log(df_vdem$Pop_2015)
+summary(df_vdem$Pop_2015)
+summary(df_vdem$Pop_log_2015)
+df_vdem$Pop_log_2016 <- log(df_vdem$Pop_2016)
+df_vdem$Pop_log_2017 <- log(df_vdem$Pop_2017)
+df_vdem$Pop_log_2018 <- log(df_vdem$Pop_2018)
+df_vdem$Pop_log_2019 <- log(df_vdem$Pop_2019)
+df_vdem$Pop_log_2020 <- log(df_vdem$Pop_2020)
+df_vdem$Pop_log_2021 <- log(df_vdem$Pop_2021)
+df_vdem$Pop_log_2022 <- log(df_vdem$Pop_2022)
+df_vdem$Pop_log_2023 <- log(df_vdem$Pop_2023)
+
+# I also want to create a categorical variable for population
+#	Micro (<1'000'000), Small (between 1'000'000 - 10'000'000), Large (between 10'000'000 and 100'000'000), and Huge (>100'000'000)
+df_vdem$Pop_cat_2015 <- cut(df_vdem$Pop_2015, breaks = c(0, 1e6, 1e7, 1e8, Inf), labels = c("Micro", "Small", "Large", "Huge"))
+
+# GDPpc Variable also has very large range, need to apply log transformation
+df_vdem$GDPpc_log_2015 <- log(df_vdem$GDPpc2015)
+df_vdem$GDPpc_log_2016 <- log(df_vdem$GDPpc2016)
+df_vdem$GDPpc_log_2017 <- log(df_vdem$GDPpc2017)
+df_vdem$GDPpc_log_2018 <- log(df_vdem$GDPpc2018)
+df_vdem$GDPpc_log_2019 <- log(df_vdem$GDPpc2019)
+df_vdem$GDPpc_log_2020 <- log(df_vdem$GDPpc2020)
+df_vdem$GDPpc_log_2021 <- log(df_vdem$GDPpc2021)
+df_vdem$GDPpc_log_2022 <- log(df_vdem$GDPpc2022)
+df_vdem$GDPpc_log_2023 <- log(df_vdem$GDPpc2023)
 
 # Data Frame for FH -------------------------------------------------------
 
