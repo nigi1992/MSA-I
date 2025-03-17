@@ -1,4 +1,5 @@
-#### Data Preparation ####
+### **Data Preparation** ###
+
 # 1. Data Import -------------------------------------------------------------
 # Cleaning environment
 rm(list = ls())
@@ -237,12 +238,6 @@ sum(is.na(df_vdem$GDPpc2023))
 # **I could impute or research them, but instead, I will choose to pick the year 2022 for my analysis instead.**
 
 
-# **Next Steps:**
-# **1. Finally choose Countries, Year(s), the IVs (Pop_log or Pop_cat) and the DVs (V-Dem u/o FH) for the analysis!!!**
-#   (What about HK and Taiwan?) -> leave for now, maybe remove later!
-# **3. Transformation of all the chosen variables?** -> no string/characters, only numeric variables
-# **4. Log transformation of Pop and GDPpc** 
-
 # 7. Variable Transformation for V-Dem ---------------------------------------
 
 # **Reminder:**
@@ -287,22 +282,6 @@ df_vdem$Pop_cat_2021 <- cut(df_vdem$Pop_2021, breaks = c(0, 1e6, 1e7, 1e8, Inf),
 df_vdem$Pop_cat_2022 <- cut(df_vdem$Pop_2022, breaks = c(0, 1e6, 1e7, 1e8, Inf), labels = c("Micro", "Small", "Large", "Huge"))
 summary(df_vdem$Pop_cat_2022)
 df_vdem$Pop_cat_2023 <- cut(df_vdem$Pop_2023, breaks = c(0, 1e6, 1e7, 1e8, Inf), labels = c("Micro", "Small", "Large", "Huge"))
-
-# Transform into ordered factors for Ordered Logistic Regression
-#install.packages("MASS")
-library(MASS)
-# converting 'Status' to an ordered factor
-df_vdem$Pop_cat_2015 <- factor(df_vdem$Pop_cat_2015, levels = c('Micro', 'Small', 'Large', 'Huge'), ordered = TRUE)
-levels(df_vdem$Pop_cat_2015)
-df_vdem$Pop_cat_2016 <- factor(df_vdem$Pop_cat_2016, levels = c('Micro', 'Small', 'Large', 'Huge'), ordered = TRUE)
-df_vdem$Pop_cat_2017 <- factor(df_vdem$Pop_cat_2017, levels = c('Micro', 'Small', 'Large', 'Huge'), ordered = TRUE)
-df_vdem$Pop_cat_2018 <- factor(df_vdem$Pop_cat_2018, levels = c('Micro', 'Small', 'Large', 'Huge'), ordered = TRUE)
-df_vdem$Pop_cat_2019 <- factor(df_vdem$Pop_cat_2019, levels = c('Micro', 'Small', 'Large', 'Huge'), ordered = TRUE)
-df_vdem$Pop_cat_2020 <- factor(df_vdem$Pop_cat_2020, levels = c('Micro', 'Small', 'Large', 'Huge'), ordered = TRUE)
-df_vdem$Pop_cat_2021 <- factor(df_vdem$Pop_cat_2021, levels = c('Micro', 'Small', 'Large', 'Huge'), ordered = TRUE)
-df_vdem$Pop_cat_2022 <- factor(df_vdem$Pop_cat_2022, levels = c('Micro', 'Small', 'Large', 'Huge'), ordered = TRUE)
-levels(df_vdem$Pop_cat_2022)
-df_vdem$Pop_cat_2023 <- factor(df_vdem$Pop_cat_2023, levels = c('Micro', 'Small', 'Large', 'Huge'), ordered = TRUE)
 
 # GDPpc Variable also has very large range, need to apply log transformation
 df_vdem$GDPpc_log_2015 <- log(df_vdem$GDPpc2015)
@@ -383,6 +362,8 @@ str(df_vdem_filtered)
 # Saving df as csv file
 file_path_vdem <- '/Users/nicolaswaser/New-project-GitHub-first/R/MSA I/Input Data/df_vdem_filtered.csv'
 write.csv(df_vdem_filtered, file_path_vdem, row.names = FALSE)
+
+
 # Data Frame for FH -------------------------------------------------------
 
 df_fh <- df1_impute
