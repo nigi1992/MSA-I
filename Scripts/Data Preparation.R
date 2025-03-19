@@ -4,6 +4,16 @@
 # Cleaning environment
 rm(list = ls())
 
+#install.packages("geosphere")
+library(geosphere)
+library(splines)
+library(tidyr)
+#install.packages("reshape2")
+library(reshape2)
+#install.packages("dplyr")
+library(dplyr)
+
+
 # Importing the aggregated data set
 install.packages("readxl")
 library(readxl)
@@ -17,6 +27,7 @@ head(df1)
 str(df1)
 
 ## Deleting whole rows of countries/territories with multiple missing values ('OWID_GZA', 'OWID_WBA', 'OWID_SML', 'OWID_ZAN', 'PSE')
+install.packages("dplyr")
 library(dplyr)
 
 # Countries to remove
@@ -86,7 +97,6 @@ str(df_vdem$`2015V_Dem`)
 install.packages("geosphere")
 library(geosphere) # For calculating geographic distances
 library(tidyverse)
-
 # Extracting coordinates and country identifiers
 coords_vdem <- df_vdem %>%
   select(country_name, lon, lat) %>%
@@ -312,6 +322,9 @@ table(df_vdem$culture)
 
 df_vdem <- df_vdem %>%
   mutate(
+    central_asia = ifelse(culture == "Central Asia", 1, 0),
+    south_asia = ifelse(culture == "South Asia", 1, 0),
+    southeast_asia = ifelse(culture == "Southeast Asia", 1, 0),
     carribbean = ifelse(culture == "Carribbean", 1, 0),
     pacific_island = ifelse(culture == "Pacific Island", 1, 0),
     eastern_europe = ifelse(culture == "Eastern European", 1, 0),
@@ -340,6 +353,7 @@ df_vdem <- df_vdem %>%
     srCentral_Asia = ifelse(sub_region == "Central Asia", 1, 0),
     srMiddle_East = ifelse(sub_region == "Middle East", 1, 0),
     srEast_Central_Europe = ifelse(sub_region == "East-Central Europe", 1, 0),
+    srBalkans = ifelse(sub_region == "Balkans", 1, 0),
     srNordic = ifelse(sub_region == "Nordic", 1, 0),
     srSouthern_Europe = ifelse(sub_region == "Southern Europe", 1, 0),
     srWestern_Europe = ifelse(sub_region == "Western Europe", 1, 0),
@@ -352,6 +366,8 @@ df_vdem <- df_vdem %>%
 
 
 # Filtering final df for Regression ---------------------------------------------
+#install.packages("dplyr")
+library(dplyr)
 df_vdem_filtered <- df_vdem %>%
   select(-c(iso2, region, sub_region, culture, area, dis_int, city_en, lat, lon, `commu _pre_dis_ussr`, V_Dem, FH, `C/T`, Pop, `GDP_pc_PPP_const_2021$`, V_Dem_Scores))
 

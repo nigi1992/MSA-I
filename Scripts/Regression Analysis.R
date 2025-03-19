@@ -8,7 +8,7 @@ vdem <- read_csv(file_path_vdem)
 # Loading Libraries
 library(stargazer)
 library(tidyverse)
-install.packages("betareg") 
+#install.packages("betareg") 
 library(betareg)
 library(broom)
 library(knitr)
@@ -249,10 +249,36 @@ model5 <- model5c
 
 # Adding even more CVs ----------------------------------------------------
 
-model6a <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$landlocked + vdem$former_commu + vdem$eastern_europe + vdem$pacific_island + vdem$carribbean, data = vdem) 
+# Adding more cultural variables
+unique(df_vdem$culture)
+table(df_vdem$culture)
+model6a <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$landlocked + 
+                     vdem$former_commu + vdem$eastern_europe + vdem$east_asia + vdem$nordic + vdem$mediterranean + vdem$south_asia + vdem$southeast_asia + vdem$central_asia, data = vdem) 
 summary(model6a)
-                   #+ vdem$east_asia + vdem$nordic + vdem$mediterranean + vdem$north_america, data = vdem)
 
+# Adding regional variables
+table(df_vdem$region)
+table(df_vdem$Asia)
+table(df_vdem$Europe)
+table(df_vdem$Africa)
+table(df_vdem$Americas)
+table(df_vdem$Oceania)
 
+model6b <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$landlocked + vdem$former_commu + vdem$Asia + vdem$Europe + vdem$Africa + vdem$Americas, data = vdem)
+summary(model6b)
 
-#### later add maybe region, subregion, 
+# Adding sub region variables
+unique(df_vdem$sub_region)
+table(df_vdem$sub_region)
+names(df_vdem)[(ncol(df_vdem)-50):ncol(df_vdem)] # names of last 50 columns
+
+model6c <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$landlocked + vdem$former_commu + vdem$srEast_Central_Europe + 
+                     vdem$srWestern_Europe +vdem$srNordic + vdem$srSouthern_Europe + vdem$srBalkans + vdem$srNorth_Africa + vdem$srCentral_Asia + vdem$srEast_Asia + vdem$srMiddle_East + 
+                     vdem$srSouth_Asia + vdem$srSoutheast_Asia + vdem$srWest_Africa + vdem$srEast_Africa + vdem$srCentral_Africa + vdem$srSouthern_Africa + vdem$srCarribbean + 
+                     vdem$srCentral_America + vdem$srSouth_America + vdem$srOceania, data = vdem)
+summary(model6c)
+
+stargazer(model5, model6a, model6c, type = "text", title = "Pop_log (IV) - V_Dem (DV) with max CVs 2022")
+
+## next? - check for multicollinearity, check for outliers, check for heteroscedasticity, check for normality of residuals, check for zero inflation, check for overdispersion
+## robustness checks? -  check for different time periods, check for different DVs (FH!), check for different controls, 
