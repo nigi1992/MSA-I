@@ -58,6 +58,39 @@ stargazer(model1_log, model1_betareg, model1_fractional, type = "text",
 # model1_betareg is best, fractional logit second best
 # but low R^2 and Adj. R^2 value, though to be expected since there are no CVs
 
+
+# Adding fixed effects ----------------------------------------------------
+
+install.packages("lfe")
+library(lfe)
+
+model1_felm <- felm(vdem$`2022V_Dem` ~ vdem$Pop_2022, data = vdem)
+summary(model1_felm)
+
+model1_felm_log <- felm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 | 0 |0 | iso3, data = vdem)
+summary(model1_felm)
+
+model1_felm_scale <- felm(vdem$`2022V_Dem` ~ scale(vdem$Pop_2022) | 0 |0 | iso3, data = vdem)
+summary(model1_felm_scale)
+
+model1_felm_scale_fixed <- felm(vdem$`2022V_Dem` ~ scale(vdem$Pop_2022) | vdem$sub_region |0 | iso3, data = vdem)
+summary(model1_felm_scale_fixed)
+
+model1_felm_log_fixed <- felm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 | vdem$sub_region |0 | iso3, data = vdem)
+summary(model1_felm_log_fixed)
+
+stargazer(model1_betareg, model1_felm_scale, model1_felm_scale_fixed, model1_felm_scale_fixed2, type = "text", 
+          title = "Simple Regression 2022: Pop (IV) - V_Dem (DV)")
+
+# Alternative approach using lapply to work with a list of models
+models_list <- list(model1_betareg, model1_felm_log, model1_felm, model1_felm_scale, model1_felm_scale_fixed, model1_felm_log_fixed)
+valid_models <- models_list[sapply(models_list, function(x) !inherits(tryCatch(summary(x), error = function(e) e), "error"))]
+
+# Using only valid models in stargazer
+stargazer(valid_models, 
+          type = "text", 
+          title = "Simple Regression 2022: Pop (IV) - V_Dem (DV)")
+
 # 2. Simple Regression 2022: Categorical_Pop (IV) - V_Dem (DV) ---------------
 table(vdem$Pop_cat_2022)
 
@@ -204,7 +237,7 @@ stargazer(model4a, model4b, model4c, type = "text",
                                "Democratic Diffusion", "Pop (Micro)/Intercept"),
           title = "Pop_cat (IV) - V_Dem (DV) with CVs 2022")
 model4 <- model4c
-# Interaction Effects ----------------
+# Interaction Effects & Robustness Checks ----------------
 model4 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022, data = vdem)
 
 # Interaction between Pop_cat_2022 and GDPpc_log_2022
@@ -216,13 +249,12 @@ model4_inter2 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 * vdem$diffusion_2
 summary(model4_inter2)
 # No sig. interaction effects between Pop_cat_2022 and GDPpc_log_2022 or diffusion_2022
 
-# Robustness Checks ----------------------------------------------------
 library(car)
 # Checking multicollinearity
 vif(lm(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022, data = vdem))
 # VIF < 5 for all variables → No serious multicollinearity issues. Generally, VIF > 5 indicates high collinearity, and VIF > 10 is a strong concern.
 
-# 5. Adding more CVs to IV Pop_log (MENA, sub_saharan_africa, latin_america, west_europe, former_commu, landlocked) -----------------------------------------------------------------------
+# 5. Adding more CVs to IV Pop_log (MENA, sub_saharan_africa, latin_america, west_europe, former_commu, landlocked, area(ln), Pop_Density, lat(ln)) -----------------------------------------------------------------------
 model3 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022, data = vdem)
 
 model5a <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe, data = vdem)
@@ -234,7 +266,21 @@ summary(model5b)
 model5c <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$landlocked + vdem$former_commu, data = vdem)
 summary(model5c)
 
-stargazer(model3, model5a, model5b, model5c, type = "text", title = "Pop_log (IV) - V_Dem (DV) with more CVs 2022")
+
+model5d <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$landlocked + vdem$former_commu + vdem$area_log , data = vdem)
+summary(model5d)
+
+model5e <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$landlocked + vdem$former_commu + vdem$area_log + vdem$Pop_Density_2022, data = vdem)
+summary(model5e)
+
+model5f <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$landlocked + vdem$former_commu + vdem$area_log + vdem$Pop_Density_2022 + vdem$lat_log, data = vdem)
+
+model5g <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$landlocked + vdem$former_commu + vdem$area_log + vdem$Pop_Density_2022 + vdem$lat_log, data = vdem)
+
+stargazer(model3, model5a, model5b, model5c, model5d, model5f, model5g, type = "text", title = "Pop_log (IV) - V_Dem (DV) with more CVs 2022")
+
+
+
 
 # The results suggest that economic development (GDP per capita) and democratic diffusion are the strongest positive predictors of democracy, while being in the MENA region or a former communist country has negative associations. 
 # Population size maintains a small but significant negative relationship with democracy scores, suggesting larger countries tend to be slightly less democratic, all else equal.
@@ -244,7 +290,54 @@ stargazer(model3, model5a, model5b, model5c, type = "text", title = "Pop_log (IV
 #Additional CV: Landlocked status: No significant effect, Former communist countries: Negative effect (-0.368, p<0.05) in model 4
 # R² increases from 0.406 to 0.493 across models
 
-model5 <- model5c
+model5 <- model5d
+
+# adding even more cvs
+install.packages("lfe")
+library(lfe)
+
+#model3
+#model5c
+#model5d
+#model5f
+#model5g
+
+
+
+model3 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022, data = vdem)
+
+
+
+model3_felm_log_base <- felm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 | 0 |0 | iso3, data = vdem)
+
+model5_felm_log_max <- felm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$landlocked + vdem$former_commu + vdem$area_log + vdem$Pop_Density_2022 + vdem$lat_log | 0 |0 | iso3, data = vdem)
+
+model5_felm_log_fixed_base <- felm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 | vdem$sub_region |0 | iso3, data = vdem)
+
+model5_felm_log_fixed_max <- felm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$landlocked + vdem$former_commu + vdem$area_log + vdem$Pop_Density_2022 + vdem$lat_log | vdem$sub_region |0 | iso3, data = vdem)
+
+model5_felm_log_fixed_max_max <- felm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$landlocked + vdem$former_commu + vdem$area_log + vdem$Pop_Density_2022 + vdem$lat_log | vdem$sub_region |0 | iso3, data = vdem)
+
+#stargazer(model3_felm_log_base, model5_felm_log_max, model5_felm_log_fixed_base, model5_felm_log_fixed_max, type = "text", 
+      #    title = "Simple Regression 2022: Pop (IV) - V_Dem (DV)")
+
+#model5d
+#model5f
+#model5g
+
+# Alternative approach using lapply to work with a list of models
+models_list <- list(model5d, model5f, model5g, model5_felm_log_fixed_base, model5_felm_log_fixed_max, model5_felm_log_fixed_max_max)
+valid_models <- models_list[sapply(models_list, function(x) !inherits(tryCatch(summary(x), error = function(e) e), "error"))]
+
+# Using only valid models in stargazer
+stargazer(valid_models, 
+          type = "text", 
+          title = "Simple Regression 2022: Pop (IV) - V_Dem (DV)")
+
+
+#In R, the scale() function is used to standardise or centre the data. It can be used to scale the columns of a matrix or data frame so that they have zero mean and unit variance, often useful in data preprocessing for statistical analysis or machine learning. By default, it centres the data but you can specify scale = FALSE to only centre or center = FALSE to only scale.
+# Interaction Effects & Robustness Checks ---------------------------------
+
 
 
 # Adding even more CVs ----------------------------------------------------
@@ -280,5 +373,13 @@ summary(model6c)
 
 stargazer(model5, model6a, model6c, type = "text", title = "Pop_log (IV) - V_Dem (DV) with max CVs 2022")
 
+model6 <- model
+
+# Interaction Effects & Robustness Checks ---------------------------------
+
 ## next? - check for multicollinearity, check for outliers, check for heteroscedasticity, check for normality of residuals, check for zero inflation, check for overdispersion
 ## robustness checks? -  check for different time periods, check for different DVs (FH!), check for different controls, 
+
+# The felm() function in R, provided by the "lfe" package, is used to fit linear models with large fixed effects. It is particularly useful for handling panel data or models with multiple group fixed effects, allowing for efficient estimation and inference in high-dimensional fixed effects regression settings.
+
+# The plm() function in R, provided by the "plm" package, is used to fit linear models with panel data. It is particularly useful for handling panel data or models with multiple group fixed effects, allowing for efficient estimation and inference in high-dimensional fixed effects regression settings.

@@ -306,6 +306,43 @@ df_vdem$GDPpc_log_2022 <- log(df_vdem$GDPpc2022)
 summary(df_vdem$GDPpc_log_2022)
 df_vdem$GDPpc_log_2023 <- log(df_vdem$GDPpc2023)
 
+# CV: area(ln), lat(ln), Pop_Density (persons per km2)
+range(df_vdem$area)
+df_vdem$area_log <- log(df_vdem$area)
+range(df_vdem$area_log)
+
+range(df_vdem$lat)
+#df_vdem$lat_pos <- (df_vdem$lat - min(df_vdem$lat) + 1)
+#df_vdem$lat_mag_pos <- (abs(df_vdem$lat) + 1)
+#range(df_vdem$lat_pos)
+#range(df_vdem$lat_mag_pos)
+#df_vdem$lat_log <- log(abs(df_vdem$lat) + 1)
+df_vdem$lat_log <- log(df_vdem$lat - min(df_vdem$lat) + 1)
+range(df_vdem$lat_log)
+
+range(df_vdem$Pop_2022)
+df_vdem$Pop_Density_2015 <- df_vdem$Pop_2015 / df_vdem$area
+df_vdem$Pop_Density_2016 <- df_vdem$Pop_2016 / df_vdem$area
+df_vdem$Pop_Density_2017 <- df_vdem$Pop_2017 / df_vdem$area
+df_vdem$Pop_Density_2018 <- df_vdem$Pop_2018 / df_vdem$area
+df_vdem$Pop_Density_2019 <- df_vdem$Pop_2019 / df_vdem$area
+df_vdem$Pop_Density_2020 <- df_vdem$Pop_2020 / df_vdem$area
+df_vdem$Pop_Density_2021 <- df_vdem$Pop_2021 / df_vdem$area
+df_vdem$Pop_Density_2022 <- df_vdem$Pop_2022 / df_vdem$area
+df_vdem$Pop_Density_2023 <- df_vdem$Pop_2023 / df_vdem$area
+range(df_vdem$Pop_Density_2022)
+
+df_vdem$Pop_Density_log_2015 <- log(df_vdem$Pop_Density_2015)
+df_vdem$Pop_Density_log_2016 <- log(df_vdem$Pop_Density_2016)
+df_vdem$Pop_Density_log_2017 <- log(df_vdem$Pop_Density_2017)
+df_vdem$Pop_Density_log_2018 <- log(df_vdem$Pop_Density_2018)
+df_vdem$Pop_Density_log_2019 <- log(df_vdem$Pop_Density_2019)
+df_vdem$Pop_Density_log_2020 <- log(df_vdem$Pop_Density_2020)
+df_vdem$Pop_Density_log_2021 <- log(df_vdem$Pop_Density_2021)
+df_vdem$Pop_Density_log_2022 <- log(df_vdem$Pop_Density_2022)
+df_vdem$Pop_Density_log_2023 <- log(df_vdem$Pop_Density_2023)
+range(df_vdem$Pop_Density_log_2022)
+
 # Creating dummy variables for regions
 df_vdem <- df_vdem %>%
   mutate(
@@ -323,15 +360,15 @@ table(df_vdem$culture)
 df_vdem <- df_vdem %>%
   mutate(
     central_asia = ifelse(culture == "Central Asia", 1, 0),
-    south_asia = ifelse(culture == "South Asia", 1, 0),
-    southeast_asia = ifelse(culture == "Southeast Asia", 1, 0),
-    carribbean = ifelse(culture == "Carribbean", 1, 0),
-    pacific_island = ifelse(culture == "Pacific Island", 1, 0),
-    eastern_europe = ifelse(culture == "Eastern European", 1, 0),
-    north_america = ifelse(culture == "North American", 1, 0),
     east_asia = ifelse(culture == "East Asia", 1, 0),
+    southeast_asia = ifelse(culture == "Southeast Asia", 1, 0),
+    south_asia = ifelse(culture == "South Asia", 1, 0),
     nordic = ifelse(culture == "Nordic", 1, 0),
+    eastern_europe = ifelse(culture == "Eastern European", 1, 0),
     mediterranean = ifelse(culture == "Mediterranean", 1, 0),
+    carribbean = ifelse(culture == "Carribbean", 1, 0),
+    north_america = ifelse(culture == "North American", 1, 0),
+    pacific_island = ifelse(culture == "Pacific Island", 1, 0),
     not_defined = ifelse(culture == "Not Defined", 1, 0)
   )
 
@@ -342,34 +379,34 @@ table(df_vdem$sub_region)
 df_vdem <- df_vdem %>%
   mutate(
     srNorth_Africa = ifelse(sub_region == "North Africa", 1, 0),
-    srSouthern_Africa = ifelse(sub_region == "Southern Africa", 1, 0),
     srWest_Africa = ifelse(sub_region == "West Africa", 1, 0),
-    srEast_Africa = ifelse(sub_region == "East Africa", 1, 0),
     srCentral_Africa = ifelse(sub_region == "Central Africa", 1, 0),
-    srEast_Asia = ifelse(sub_region == "East Asia", 1, 0),
-    srSouth_Asia = ifelse(sub_region == "South Asia", 1, 0),
-    srSoutheast_Asia = ifelse(sub_region == "Southeast Asia", 1, 0),
+    srEast_Africa = ifelse(sub_region == "East Africa", 1, 0),
+    srSouthern_Africa = ifelse(sub_region == "Southern Africa", 1, 0),
     srCaucasus = ifelse(sub_region == "Caucasus", 1, 0),
     srCentral_Asia = ifelse(sub_region == "Central Asia", 1, 0),
     srMiddle_East = ifelse(sub_region == "Middle East", 1, 0),
+    srEast_Asia = ifelse(sub_region == "East Asia", 1, 0),
+    srSoutheast_Asia = ifelse(sub_region == "Southeast Asia", 1, 0),
+    srSouth_Asia = ifelse(sub_region == "South Asia", 1, 0),
+    srNordic = ifelse(sub_region == "Nordic", 1, 0),
+    srWestern_Europe = ifelse(sub_region == "Western Europe", 1, 0),
     srEast_Central_Europe = ifelse(sub_region == "East-Central Europe", 1, 0),
     srBalkans = ifelse(sub_region == "Balkans", 1, 0),
-    srNordic = ifelse(sub_region == "Nordic", 1, 0),
     srSouthern_Europe = ifelse(sub_region == "Southern Europe", 1, 0),
-    srWestern_Europe = ifelse(sub_region == "Western Europe", 1, 0),
     srNorth_America = ifelse(sub_region == "North America", 1, 0),
-    srCarribbean = ifelse(sub_region == "Carribbean", 1, 0),
     srCentral_America = ifelse(sub_region == "Central America", 1, 0),
+    srCarribbean = ifelse(sub_region == "Carribbean", 1, 0),
     srSouth_America = ifelse(sub_region == "South America", 1, 0),
     srOceania = ifelse(sub_region == "Oceania", 1, 0)
   )
 
 
 # Filtering final df for Regression ---------------------------------------------
-#install.packages("dplyr")
+install.packages("dplyr")
 library(dplyr)
 df_vdem_filtered <- df_vdem %>%
-  select(-c(iso2, region, sub_region, culture, area, dis_int, city_en, lat, lon, `commu _pre_dis_ussr`, V_Dem, FH, `C/T`, Pop, `GDP_pc_PPP_const_2021$`, V_Dem_Scores))
+  select(-c(iso2, dis_int, city_en, lat, lon, V_Dem, FH, `C/T`, Pop, `GDP_pc_PPP_const_2021$`, V_Dem_Scores))
 
 colSums(is.na(df_vdem_filtered)) # Showing NAs of all columns
 colnames(df_vdem_filtered)[colSums(is.na(df_vdem_filtered)) > 0]
