@@ -1,4 +1,4 @@
-### **Regression Analysis** ###
+### **Regression Analysis for IV V-Dem** ###
 
 # Importing the data
 library(readr)
@@ -50,7 +50,7 @@ summary(model1_betareg)
 
 # Trying Fractional Logit Regression
 model1_fractional <- glm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022, 
-                        family = quasibinomial(link = "logit"), data = vdem)
+                         family = quasibinomial(link = "logit"), data = vdem)
 summary(model1_fractional)
 
 stargazer(model1_log, model1_betareg, model1_fractional, type = "text", 
@@ -215,21 +215,21 @@ summary(model4a)
 coef_table2 <- tidy(model4a)
 kable(coef_table2, digits = 3)
 #stargazer(model4a, type = "text", covariate.labels = c("Population (Small)", "Population (Large)", 
- #                              "Population (Huge)", "GDPpc log 2022", "Pop (Micro)/Intercept"))
+#                              "Population (Huge)", "GDPpc log 2022", "Pop (Micro)/Intercept"))
 
 model4b <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 + vdem$GDPpc_log_2022 + vdem$island_state, data = vdem)
 summary(model4b)
 coef_table3 <- tidy(model4b) 
 kable(coef_table3, digits = 3)
 #stargazer(model4b, type = "text", covariate.labels = c("Population (Small)", "Population (Large)", 
- #                              "Population (Huge)", "GDPpc log 2022", "Island State", "Pop (Micro)/Intercept"))
+#                              "Population (Huge)", "GDPpc log 2022", "Island State", "Pop (Micro)/Intercept"))
 
 model4c <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022, data = vdem)
 summary(model4c)
 coef_table4 <- tidy(model4c)
 kable(coef_table4, digits = 3)
 #stargazer(model4c, type = "text", covariate.labels = c("Population (Small)", "Population (Large)", 
- #                              "Population (Huge)", "GDPpc log 2022", "Island State", "Democratic Diffusion", "Pop (Micro)/Intercept"))
+#                              "Population (Huge)", "GDPpc log 2022", "Island State", "Democratic Diffusion", "Pop (Micro)/Intercept"))
 
 stargazer(model4a, model4b, model4c, type = "text",
           covariate.labels = c("Population (Small)", "Population (Large)", 
@@ -371,9 +371,9 @@ table(df_vdem$sub_region)
 names(df_vdem)[(ncol(df_vdem)-50):ncol(df_vdem)] # names of last 50 columns
 
 #model6d <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$landlocked + vdem$former_commu + vdem$srEast_Central_Europe + 
- #                    vdem$srWestern_Europe +vdem$srNordic + vdem$srSouthern_Europe + vdem$srBalkans + vdem$srNorth_Africa + vdem$srCentral_Asia + vdem$srEast_Asia + vdem$srMiddle_East + 
-  #                   vdem$srSouth_Asia + vdem$srSoutheast_Asia + vdem$srWest_Africa + vdem$srEast_Africa + vdem$srCentral_Africa + vdem$srSouthern_Africa + vdem$srCarribbean + 
-   #                  vdem$srCentral_America + vdem$srSouth_America + vdem$srOceania, data = vdem)
+#                    vdem$srWestern_Europe +vdem$srNordic + vdem$srSouthern_Europe + vdem$srBalkans + vdem$srNorth_Africa + vdem$srCentral_Asia + vdem$srEast_Asia + vdem$srMiddle_East + 
+#                   vdem$srSouth_Asia + vdem$srSoutheast_Asia + vdem$srWest_Africa + vdem$srEast_Africa + vdem$srCentral_Africa + vdem$srSouthern_Africa + vdem$srCarribbean + 
+#                  vdem$srCentral_America + vdem$srSouth_America + vdem$srOceania, data = vdem)
 
 model6d <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$landlocked + vdem$former_commu + area_log + vdem$sub_region, data = vdem)
 

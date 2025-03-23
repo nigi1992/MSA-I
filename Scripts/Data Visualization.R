@@ -4,7 +4,7 @@
 library(ggplot2)
 
 
-# 1. Simple Model 2022, no CV ---------------------------------------------
+# 1. Simple Model 2022 IV V-Dem, no CV ---------------------------------------------
 
 # Plotting Model 1 log
 ggplot(vdem, aes(x = Pop_log_2022, y = `2022V_Dem`)) +
