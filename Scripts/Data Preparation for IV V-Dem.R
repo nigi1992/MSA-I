@@ -3,7 +3,7 @@
 # 1. Data Import -------------------------------------------------------------
 
 # Cleaning environment
-rm(list = ls())
+#rm(list = ls())
 
 #install.packages("geosphere")
 library(geosphere)
@@ -109,13 +109,16 @@ df_vdem <- df_vdem %>% filter(is.na(V_Dem_Scores))
 # Removing all columns from column 53 onwards
 df_vdem <- df_vdem[, 1:52]
 
+
+#### **Left To Do!!! Decide about HK, Taiwan, FL and Mon!** ####
+
+
+# 5. CV: Diffusion Variable for V-Dem--------------------------------------------------
+
 # Showing Data Type of Variables "lon", "lat" and "2015V-Dem" for diffusion variable
 str(df_vdem$lon)
 str(df_vdem$lat)
 str(df_vdem$`2015V_Dem`)
-
-
-# 5. CV: Diffusion Variable for V-Dem--------------------------------------------------
 
 install.packages("geosphere")
 library(geosphere) # For calculating geographic distances

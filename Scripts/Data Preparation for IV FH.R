@@ -106,6 +106,8 @@ str(df_fh)
 df_fh <- df_fh[, -c(43:52)]
 table(!is.na(df_fh$FH_Scores))
 
+# **Left To Do!!! Decide about HK, Taiwan, FL and Mon!**
+
 
 # 5. CV: Diffusion Variable for FH--------------------------------------------------
 
@@ -134,62 +136,62 @@ years_fh <- 2015:2023
 df_fh_long <- df_fh %>%
   pivot_longer(cols = matches("\\d{4}Total"), 
                names_to = "year", 
-               values_to = "democracy_score") %>%
+               values_to = "total_fh") %>%
   mutate(year = as.numeric(str_extract(year, "\\d{4}"))) # Extract year as a number
 
 # Create a list to store yearly diffusion scores
-diffusion_list <- list()
+diffusion_list_fh <- list()
 
 # Compute the weighted democracy diffusion score for each year
 for (year in years_fh) {
   # Extract democracy scores for the given year
-  democracy_scores <- df_fh_long %>%
+  total_fh <- df_fh_long %>%
     filter(year == !!year) %>%
-    select(country_name, democracy_score) %>%
+    select(country_name, total_fh) %>%
     distinct()
   
   # Merge with country coordinates
-  democracy_scores <- left_join(coords_fh, democracy_scores, by = "country_name")
+  total_fh <- left_join(coords_fh, total_fh, by = "country_name")
   
   # Convert democracy scores to matrix form
-  score_matrix <- matrix(democracy_scores$democracy_score, 
+  score_matrix_fh <- matrix(total_fh$total_fh, 
                          nrow = nrow(coords_fh), 
                          ncol = 1)
   
   # Compute the weighted sum of democracy scores
-  weighted_sum_fh <- inverse_distance_fh %*% score_matrix
+  weighted_sum_fh <- inverse_distance_fh %*% score_matrix_fh
   # Compute the total sum of weights (to normalize)
   total_weights_fh <- rowSums(inverse_distance_fh)
   # Compute the final diffusion variable as a weighted average
-  diffusion_value <- weighted_sum_fh / total_weights_fh
+  diffusion_value_fh <- weighted_sum_fh / total_weights_fh
   #diffusion_value <- inverse_distance_fh %*% score_matrix
   # Store the results in a dataframe
-  diffusion_df <- data.frame(
+  diffusion_df_fh <- data.frame(
     country_name = coords_fh$country_name,
     year = year,
-    diffusion_score = as.numeric(diffusion_value)
+    diffusion_fh = as.numeric(diffusion_value_fh)
   )
   
   # Append to the list
-  diffusion_list[[as.character(year)]] <- diffusion_df
+  diffusion_list_fh[[as.character(year)]] <- diffusion_df_fh
 }
 
 
 # Combine all years into a single dataframe
-diffusion_scores <- bind_rows(diffusion_list)
+diffusion_scores_fh <- bind_rows(diffusion_list_fh)
 
 # Merge diffusion scores back into df_fh_long
-df_fh_long <- left_join(df_fh_long, diffusion_scores, by = c("country_name", "year"))
+df_fh_long <- left_join(df_fh_long, diffusion_scores_fh, by = c("country_name", "year"))
 
 # Convert back to wide format
 df_fh <- df_fh_long %>%
-  pivot_wider(names_from = "year", values_from = c("democracy_score", "diffusion_score"))
+  pivot_wider(names_from = "year", values_from = c("total_fh", "diffusion_fh"))
 
 # View the updated dataset
 head(df_fh)
 
-head(df_fh$diffusion_score_2015)
-summary(df_fh$diffusion_score_2015)
+head(df_fh$diffusion_fh_2015)
+summary(df_fh$diffusion_fh_2015)
 
 head(df_vdem$diffusion_2015)
 summary(df_vdem$diffusion_2015)
@@ -200,22 +202,16 @@ df_ranking_vdem <- df_vdem
 df_ranking_fh <- df_fh
 
 df_ranking_vdem$rank_vdem <- rank(-df_vdem$diffusion_2015, na.last =TRUE)
-df_ranking_fh$rank_fh <- rank(-df_fh$diffusion_score_2015, na.last =TRUE)
+df_ranking_fh$rank_fh <- rank(-df_fh$diffusion_fh_2015, na.last =TRUE)
 
 library(dplyr)
 df_ranking_vdem <- df_ranking_vdem %>%
   select(c(country_name, rank_vdem, diffusion_2015))
 
 df_ranking_fh <- df_ranking_fh %>% 
-  select(c(country_name, rank_fh, diffusion_score_2015))
+  select(c(country_name, rank_fh, diffusion_fh_2015))
 
 df_ranking <- left_join(df_ranking_vdem, df_ranking_fh, by = "country_name")
-
-# **Next Steps:**
-# **4. Decide about HK, Taiwan, FL and Mon**
-# **5. Remove NAs from all chosen IV, DV and CVs
-# **6. Transformation of all the chosen variables? -> no string/characters, only numeric variables
-# **7. Log transformation of Pop and GDPpc 
 
 
 # 6. Dealing with missing values for FH -----------------------------------------------------------------------

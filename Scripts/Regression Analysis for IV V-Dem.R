@@ -91,7 +91,7 @@ stargazer(valid_models,
           type = "text", 
           title = "Simple Regression 2022: Pop (IV) - V_Dem (DV)")
 
-# 2. Simple Regression 2022: Categorical_Pop (IV) - V_Dem (DV) ---------------
+# 2. Simple Regression 2022: Categorical_Pop (IV) - V_Dem (DV) -------------
 table(vdem$Pop_cat_2022)
 
 #vdem$Pop_cat_2022 <- factor(vdem$Pop_cat_2022, levels = c('Micro', 'Small', 'Large', 'Huge'), ordered=TRUE)
