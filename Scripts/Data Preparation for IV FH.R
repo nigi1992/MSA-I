@@ -3,7 +3,7 @@
 # 1. Data Import -------------------------------------------------------------
 
 # Cleaning environment
-rm(list = ls())
+#rm(list = ls())
 
 #install.packages("geosphere")
 library(geosphere)
@@ -43,6 +43,8 @@ df1_clean %>%
   group_by(iso3, iso2, country_name, city_en) %>% 
   summarise(n = n()) %>% 
   filter(n > 1)
+
+# Decided to keep FL, Mon, HK and Taiwan
 
 
 # 3. Imputation of missing values --------------------------------------------
@@ -92,6 +94,7 @@ dublicate <- duplicated(df1_impute$lon)
 df1_impute$lon[dublicate]
 
 dublicate <- duplicated(df1_impute$area)
+range(df1_impute$area)
 df1_impute$area[dublicate]
 
 
@@ -105,8 +108,6 @@ str(df_fh)
 # Removing columns 43 - 52 with v-dem scores
 df_fh <- df_fh[, -c(43:52)]
 table(!is.na(df_fh$FH_Scores))
-
-# **Left To Do!!! Decide about HK, Taiwan, FL and Mon!**
 
 
 # 5. CV: Diffusion Variable for FH--------------------------------------------------
@@ -164,7 +165,7 @@ for (year in years_fh) {
   total_weights_fh <- rowSums(inverse_distance_fh)
   # Compute the final diffusion variable as a weighted average
   diffusion_value_fh <- weighted_sum_fh / total_weights_fh
-  #diffusion_value <- inverse_distance_fh %*% score_matrix
+  #diffusion_value_fh <- inverse_distance_fh %*% score_matrix
   # Store the results in a dataframe
   diffusion_df_fh <- data.frame(
     country_name = coords_fh$country_name,
@@ -286,7 +287,9 @@ df_fh$GDPpc_log_2022 <- log(df_fh$GDPpc2022)
 summary(df_fh$GDPpc_log_2022)
 df_fh$GDPpc_log_2023 <- log(df_fh$GDPpc2023)
 
+
 # CV: area(ln), lat(ln), Pop_Density (persons per km2)---------------------
+
 # Area (ln)
 range(df_fh$area)
 df_fh$area_log <- log(df_fh$area)
@@ -323,19 +326,17 @@ summary(df_fh$Pop_Density_log_2022)
 df_fh$Pop_Density_log_2023 <- log(df_fh$Pop_Density_2023)
 
 # CV: Dummy Variable for culture, region and sub-region--------------------
+
 # Creating dummy variables for culture
 unique(df_fh$culture)
 table(df_fh$culture)
-
 df_fh <- df_fh %>%
   mutate(
     central_asia = ifelse(culture == "Central Asia", 1, 0),
     east_asia = ifelse(culture == "East Asia", 1, 0),
     southeast_asia = ifelse(culture == "Southeast Asia", 1, 0),
     south_asia = ifelse(culture == "South Asia", 1, 0),
-    nordic = ifelse(culture == "Nordic", 1, 0),
     eastern_europe = ifelse(culture == "Eastern European", 1, 0),
-    mediterranean = ifelse(culture == "Mediterranean", 1, 0),
     carribbean = ifelse(culture == "Carribbean", 1, 0),
     north_america = ifelse(culture == "North American", 1, 0),
     pacific_island = ifelse(culture == "Pacific Island", 1, 0),
@@ -381,12 +382,13 @@ df_fh <- df_fh %>%
   )
 
 
+
 # 8. Filtering final fh df for Regression ---------------------------------------------
 
 install.packages("dplyr")
 library(dplyr)
 df_fh_filtered <- df_fh %>%
-  select(-c(iso2, dis_int, city_en, lat, lon, V_Dem, FH, `C/T`, Pop, `GDP_pc_PPP_const_2021$`, FH_Scores))
+  select(-c(iso2, dis_int, city_en, lat, lon, `former/current_communist_regime`, V_Dem, FH, `C/T`, Pop, `GDP_pc_PPP_const_2021$`, FH_Scores))
 
 colSums(is.na(df_fh_filtered)) # Showing NAs of all columns
 colnames(df_fh_filtered)[colSums(is.na(df_fh_filtered)) > 0]

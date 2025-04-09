@@ -50,7 +50,7 @@ ggplot(fh, aes(x = fh$Pop_log_2022, y = fh$total_fh_2022)) +
   theme_minimal()
 
 
-# # Ordinal Logistic Regression polr(): DV (FH Status) & IV (Log P --------
+# Ordinal Logistic Regression polr(): DV (FH Status) & IV (Log Pop) --------
 
 library(tidyr)
 library(ggplot2)

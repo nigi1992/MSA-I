@@ -45,6 +45,8 @@ df1_clean %>%
   summarise(n = n()) %>% 
   filter(n > 1)
 
+# Decided to keep HK and Taiwan
+
 
 # 3. Imputation of missing values --------------------------------------------
 
@@ -93,6 +95,7 @@ dublicate <- duplicated(df1_impute$lon)
 df1_impute$lon[dublicate]
 
 dublicate <- duplicated(df1_impute$area)
+range(df1_impute$area, na.rm = TRUE) # Checking range of area values
 df1_impute$area[dublicate]
 
 # 4. Data Frame for V-Dem ----------------------------------------------------
@@ -108,9 +111,6 @@ df_vdem <- df_vdem %>% filter(is.na(V_Dem_Scores))
 
 # Removing all columns from column 53 onwards
 df_vdem <- df_vdem[, 1:52]
-
-
-#### **Left To Do!!! Decide about HK, Taiwan, FL and Mon!** ####
 
 
 # 5. CV: Diffusion Variable for V-Dem--------------------------------------------------
@@ -293,9 +293,7 @@ df_vdem <- df_vdem %>%
     east_asia = ifelse(culture == "East Asia", 1, 0),
     southeast_asia = ifelse(culture == "Southeast Asia", 1, 0),
     south_asia = ifelse(culture == "South Asia", 1, 0),
-    nordic = ifelse(culture == "Nordic", 1, 0),
     eastern_europe = ifelse(culture == "Eastern European", 1, 0),
-    mediterranean = ifelse(culture == "Mediterranean", 1, 0),
     carribbean = ifelse(culture == "Carribbean", 1, 0),
     north_america = ifelse(culture == "North American", 1, 0),
     pacific_island = ifelse(culture == "Pacific Island", 1, 0),
@@ -343,12 +341,13 @@ df_vdem <- df_vdem %>%
   )
 
 
+
 # 8. Filtering final v-dem df for Regression ---------------------------------------------
 
 install.packages("dplyr")
 library(dplyr)
 df_vdem_filtered <- df_vdem %>%
-  select(-c(iso2, dis_int, city_en, lat, lon, V_Dem, FH, `C/T`, Pop, `GDP_pc_PPP_const_2021$`, V_Dem_Scores))
+  select(-c(iso2, dis_int, city_en, lat, lon, `former/current_communist_regime`, V_Dem, FH, `C/T`, Pop, `GDP_pc_PPP_const_2021$`, V_Dem_Scores))
 
 colSums(is.na(df_vdem_filtered)) # Showing NAs of all columns
 colnames(df_vdem_filtered)[colSums(is.na(df_vdem_filtered)) > 0]

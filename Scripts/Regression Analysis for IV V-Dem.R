@@ -31,7 +31,7 @@ levels(vdem$Pop_cat_2022)
 vdem$Pop_cat_2023 <- factor(vdem$Pop_cat_2023, levels = c('Micro', 'Small', 'Large', 'Huge'), ordered = TRUE)
 is.factor(vdem$Pop_cat_2015)
 
-# 1. Tests: Simple Regression for 2022: Pop (IV) - V_Dem (DV) -----------
+# 1. Pop_log_2022 (IV) - V_Dem (DV) - Simple - lm(), betareg(), glm() -----------
 
 # IV Pop_2022 no log
 model1_no_log <- lm(vdem$`2022V_Dem` ~ vdem$Pop_2022, data = vdem)
@@ -54,12 +54,12 @@ model1_fractional <- glm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022,
 summary(model1_fractional)
 
 stargazer(model1_log, model1_betareg, model1_fractional, type = "text", 
-          title = "Simple Regression 2022: Pop (IV) - V_Dem (DV)") 
+          title = "Pop_log_2022 (IV) - V_Dem (DV) - Simple - lm(), betareg(), glm()") 
 # model1_betareg is best, fractional logit second best
 # but low R^2 and Adj. R^2 value, though to be expected since there are no CVs
 
 
-# Adding fixed effects ----------------------------------------------------
+# Adding fixed effects - felm() ----------------------------------------------------
 
 install.packages("lfe")
 library(lfe)
@@ -79,8 +79,8 @@ summary(model1_felm_scale_fixed)
 model1_felm_log_fixed <- felm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 | vdem$sub_region |0 | iso3, data = vdem)
 summary(model1_felm_log_fixed)
 
-stargazer(model1_betareg, model1_felm_scale, model1_felm_scale_fixed, model1_felm_scale_fixed2, type = "text", 
-          title = "Simple Regression 2022: Pop (IV) - V_Dem (DV)")
+#stargazer(model1_betareg, model1_felm_scale, model1_felm_scale_fixed, model1_felm_scale_fixed2, type = "text", 
+  #        title = "Simple Regression 2022: Pop (IV) - V_Dem (DV)")
 
 # Alternative approach using lapply to work with a list of models
 models_list <- list(model1_betareg, model1_felm_log, model1_felm, model1_felm_scale, model1_felm_scale_fixed, model1_felm_log_fixed)
@@ -91,7 +91,7 @@ stargazer(valid_models,
           type = "text", 
           title = "Simple Regression 2022: Pop (IV) - V_Dem (DV)")
 
-# 2. Simple Regression 2022: Categorical_Pop (IV) - V_Dem (DV) -------------
+# 2. Cat_pop_2022 (IV) - V_Dem (DV) - Simple - polr() -------------
 table(vdem$Pop_cat_2022)
 
 #vdem$Pop_cat_2022 <- factor(vdem$Pop_cat_2022, levels = c('Micro', 'Small', 'Large', 'Huge'), ordered=TRUE)
@@ -107,11 +107,12 @@ kable(coef_table, digits = 3)
 
 stargazer(model1_cat, type = "text", 
           covariate.labels = c("Population (Small)", "Population (Large)", 
-                               "Population (Huge)", "Population (Micro)"))
+                               "Population (Huge)", "Population (Micro)"),
+          title = "Cat_pop_2022 (IV) - V_Dem (DV) - Simple - polr()")
 # Only stat. significant for large and less for hug
 # again low R^2 value
 
-# Tests of log_pop and log_cat -----------
+# Tests of log_pop_2022 and log_cat_2022 -----------
 library(car)       # For regression diagnostics
 library(lmtest)    # For heteroskedasticity tests
 library(sandwich)  # For robust standard errors
@@ -145,7 +146,7 @@ print(model_comparison)
 # It also has the lowest BIC (-25.43807), suggesting it provides the best balance between fit and complexity.
 
 
-# 3. Introducing CVs (GDPpc_log_2022, Island State, diffusion_2022) --------
+# 3. Pop_log_2022 (IV) - V_Dem (DV) - betareg() - CVs Benchmark (GDPpc_log_2022, island_state, diffusion_2022, communist) --------
 
 # Renaming models for ease of use
 model1 <- model1_betareg
@@ -163,145 +164,214 @@ summary(model3b)
 model3c <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022, data = vdem)
 summary(model3c)
 
-stargazer(model3a, model3b, model3c, type = "text", 
-          title = "Pop_log (IV) - V_Dem (DV) with CVs 2022")
-model3 <- model3c
-# The coefficient for Pop_log_2022 is negative and statistically significant in all models. 
-# But statistical significance decreases from Model 1 (p<0.05) to Models 2 and 3 (p<0.1)
-# Coefficient magnitude decreases from -0.099 to -0.078 as control variables are added
+# Adding communist
+model3d <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + 
+                     vdem$communist, data = vdem)
+summary(model3d)
+
+stargazer(model3a, model3b, model3c, model3d, type = "text", 
+          title = "Pop_log_2022 (IV) - V_Dem (DV) - betareg() - CVs Benchmark")
+model3 <- model3d
+# The coefficient for Pop_log_2022 is negative and statistically significant in all models. apart from 3.
+# But statistical significance decreases from Model 1 (p<0.05) to Models 2 + 4 (p<0.1) and disappears in Model 3.
+# Coefficient magnitude decreases from -0.099 to -0.064 as control variables are added
 
 #GDPpc_log_2022 (logged GDP per capita) has a strong positive effect on democracy levels.
 
-#Island states tend to have higher democracy scores, but the effect is only significant in the full model.
+#Island states tend to have higher democracy scores, but the effect is only significant in the model 3.
 
 #Democratic diffusion (diffusion_2022) has the strongest effect, suggesting that regional democratic influence plays a crucial role.
 
+#communist also has sig. neg. effect.
+
 #R^2 increases as more controls are added, improving model fit. 
-#Model 3 provides the best fit with an R² of 0.406, explaining about 41% of variance in democracy scores
-#The log likelihood increases substantially from 45.859 (Model 1) to 62.148 (Model 3)
-#All variables in Model 3 are statistically significant
+#Model 4 provides the best fit with an R² of 0.455, explaining about 45% of variance in democracy scores
+#The log likelihood increases substantially from 45.859 (Model 1) to 69.324 (Model 3)
+#All variables in Model 4 are statistically significant but island.
 
 #The analysis confirms that population size is indeed a significant predictor of democracy scores, with larger countries tending to have lower democracy levels. 
 #However, this effect is relatively modest compared to economic development and regional diffusion effects. 
 #The relationship remains significant even when controlling for these important variables, suggesting population size has an independent effect on democratic governance.
 
-# Interaction Effects ----------------
-model3c <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022, data = vdem)
+# Interaction Effects & Robustness Checks ----------------
+model3d <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + 
+                     vdem$communist, data = vdem)
 
 # Interaction between Pop_log_2022 and GDPpc_log_2022
-model3_inter1 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 * vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022, data = vdem)
+model3_inter1 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 * vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + 
+                           vdem$communist, data = vdem)
 # Interaction between Pop_log_2022 and diffusion_2022
-model3_inter2 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 * vdem$diffusion_2022 + vdem$GDPpc_log_2022 + vdem$island_state, data = vdem)
+model3_inter2 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 * vdem$diffusion_2022 + vdem$GDPpc_log_2022 + vdem$island_state + 
+                           vdem$communist, data = vdem)
+# Interaction between Pop_log_2022 and communist
+model3_inter3 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 * vdem$communist + vdem$GDPpc_log_2022 + vdem$island_state + 
+                           vdem$diffusion_2022, data = vdem)
 
 summary(model3_inter1) 
 # The interaction between population and GDP per capita is not significant, meaning the effect of population size on democracy is not conditional on GDP per capita
 summary(model3_inter2)
 # The interaction between population and democratic diffusion is not significant, meaning the effect of population size on democracy does not depend on the regional democratic environment.
+summary(model3_inter3)
+# The interaction between population and communist regime form is significant, meaning the effect of population size on democracy is at least partially conditional on the type of regime.
+# Though it is very small .008
+cor(vdem$Pop_log_2022, vdem$communist) # No sig. cor.
 
-# Robustness Checks ----------------------------------------------------
+
 library(car)
-
 # Checking multicollinearity
-vif(lm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022, data = vdem))
+vif(lm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$communist, data = vdem))
 # VIF < 5 for all variables → No serious multicollinearity issues. Generally, VIF > 5 indicates high collinearity, and VIF > 10 is a strong concern.
 #	Since all values are close to 1, this suggests that none of the independent variables are strongly correlated with each other.
 # Multicollinearity is not a concern in this model.
 
-# 4. Introducing CVs for Pop_cat (GDPpc_log_2022, Island State, diffusion_2022) -------
+# 4. Cat_pop_2022 (IV) - V_Dem (DV) - polr() - CVs Benchmark (GDPpc_log_2022, island_state, diffusion_2022, communist)  -------
+
 contrasts(vdem$Pop_cat_2022) <- contr.treatment(4)
 
 model4a <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 + vdem$GDPpc_log_2022, data = vdem)
-summary(model4a)
+#summary(model4a)
 coef_table2 <- tidy(model4a)
 kable(coef_table2, digits = 3)
 #stargazer(model4a, type = "text", covariate.labels = c("Population (Small)", "Population (Large)", 
 #                              "Population (Huge)", "GDPpc log 2022", "Pop (Micro)/Intercept"))
 
 model4b <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 + vdem$GDPpc_log_2022 + vdem$island_state, data = vdem)
-summary(model4b)
+#summary(model4b)
 coef_table3 <- tidy(model4b) 
 kable(coef_table3, digits = 3)
 #stargazer(model4b, type = "text", covariate.labels = c("Population (Small)", "Population (Large)", 
 #                              "Population (Huge)", "GDPpc log 2022", "Island State", "Pop (Micro)/Intercept"))
 
 model4c <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022, data = vdem)
-summary(model4c)
+#summary(model4c)
 coef_table4 <- tidy(model4c)
 kable(coef_table4, digits = 3)
 #stargazer(model4c, type = "text", covariate.labels = c("Population (Small)", "Population (Large)", 
-#                              "Population (Huge)", "GDPpc log 2022", "Island State", "Democratic Diffusion", "Pop (Micro)/Intercept"))
+#                              "Population (Huge)", "GDPpc log 2022", "Island State", "Diffusion", "Pop (Micro)/Intercept"))
 
-stargazer(model4a, model4b, model4c, type = "text",
+model4d <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + 
+                     vdem$communist, data = vdem)
+summary(model4d)
+coef_table4b <- tidy(model4d)
+kable(coef_table4b, digits = 3)
+stargazer(model4a, model4b, model4c, model4d, type = "text",
           covariate.labels = c("Population (Small)", "Population (Large)", 
                                "Population (Huge)", "GDPpc log 2022", "Island State", 
-                               "Democratic Diffusion", "Pop (Micro)/Intercept"),
-          title = "Pop_cat (IV) - V_Dem (DV) with CVs 2022")
-model4 <- model4c
+                               "Diffusion", "Communist", "Pop (Micro)/Intercept"),
+          title = "Cat_pop_2022 (IV) - V_Dem (DV) - polr() - CVs Benchmark")
+model4 <- model4d
+
 # Interaction Effects & Robustness Checks ----------------
-model4 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022, data = vdem)
+model4 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$communist, data = vdem)
 
 # Interaction between Pop_cat_2022 and GDPpc_log_2022
-model4_inter1 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 * vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022, data = vdem)
+model4_inter1 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 * vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$communist, data = vdem)
 summary(model4_inter1)
 
 # Interaction between Pop_cat_2022 and diffusion_2022
-model4_inter2 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 * vdem$diffusion_2022 + vdem$GDPpc_log_2022 + vdem$island_state, data = vdem)
+model4_inter2 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 * vdem$diffusion_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$communist, data = vdem)
 summary(model4_inter2)
-# No sig. interaction effects between Pop_cat_2022 and GDPpc_log_2022 or diffusion_2022
+
+model4_inter3 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 * vdem$communist + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022, data = vdem)
+summary(model4_inter3)
+# No sig. interaction effects between Pop_cat_2022 and GDPpc_log_2022 or diffusion_2022 or communist
 
 library(car)
 # Checking multicollinearity
-vif(lm(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022, data = vdem))
+vif(lm(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$communist, data = vdem))
 # VIF < 5 for all variables → No serious multicollinearity issues. Generally, VIF > 5 indicates high collinearity, and VIF > 10 is a strong concern.
 
-# 5. Adding more CVs to IV Pop_log (MENA, sub_saharan_africa, latin_america, west_europe, former_commu, landlocked -----------------------------------------------------------------------
-model3 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022, data = vdem)
+# 5. Pop_log_2022 (IV) - V_Dem (DV) - betareg() - CVs Extended (+ MENA, sub_saharan_africa, latin_america, west_europe, southeast_asia, central_asia) -----------------------------------------------------------------------
 
-model5a <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe, data = vdem)
+model3 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$communist, data = vdem)
 
-model5b <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$landlocked, data = vdem)
+model5a <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$communist + vdem$MENA + 
+                     vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe, data = vdem)
 
-model5c <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$landlocked + vdem$former_commu, data = vdem)
+model5b <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$communist + vdem$MENA + 
+                     vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$southeast_asia, data = vdem)
 
-stargazer(model3, model5a, model5b, model5c, type = "text", title = "Pop_log (IV) - V_Dem (DV) with more CVs 2022")
+model5c <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$communist + vdem$MENA + 
+                     vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$southeast_asia + vdem$central_asia, data = vdem)
 
-# The results suggest that economic development (GDP per capita) and democratic diffusion are the strongest positive predictors of democracy, while being in the MENA region or a former communist country has negative associations. 
+stargazer(model3, model5a, model5b, model5c, type = "text", title = "Pop_log_2022 (IV) - V_Dem (DV) - betareg() - CVs Extended")
+
+model5 <- model5c
+# The results suggest that economic development (GDP per capita) and democratic diffusion are the strongest positive predictors of democracy, while being in the MENA region or a (former) communist country has negative associations. 
 # Population size maintains a small but significant negative relationship with democracy scores, suggesting larger countries tend to be slightly less democratic, all else equal.
-# Island state: Loses significance when more controls are added. By model 4, the effect is positive but no longer statistically significant
-# Regional effects: MENA (Middle East and North Africa): Strong negative effect (-0.925 in model 4, p<0.01)
-# Sub-Saharan Africa: Initially positive and significant, becomes non-significant in model 4. Latin America and West Europe: No significant effects
+# Island state: Has no significance when more controls are added. the effect is positive but not statistically significant
+# Communist: sig and strong neg. effect
+# Regional effects: MENA (Middle East and North Africa): Strong negative effect (-1.292 in model 4, p<0.01)
+# Sub-Saharan Africa: Initially positive and significant, becomes non-significant in model 3 & 4. 
+# Latin America later sig. (neg.) and West Europe: Pos., but no significant effects
+# southeast asia: sig. neg. effect, central_asia: not sig. neg. effect
 #Additional CV: Landlocked status: No significant effect, Former communist countries: Negative effect (-0.368, p<0.05) in model 4
-# R² increases from 0.406 to 0.493 across models
+# R² increases from 0.455 to 0.555 across models
 
 
-# adding even more cvs (area(ln), Pop_Density, lat(ln))
+# 6. Pop_log_2022 (IV) - V_Dem (DV) - betareg() - CVs Maximal (+ landlocked, area(ln), lat(ln)) -------------
+
+range(vdem$lat_log)
+range(vdem$area)
+range(vdem$area_log)
+
+model5 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$communist + vdem$MENA + 
+                     vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$southeast_asia + vdem$central_asia, data = vdem)
+
+model6a <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$communist + vdem$MENA + 
+                    vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$southeast_asia + vdem$central_asia + vdem$landlocked,
+                  data = vdem)
+
+model6b <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$communist + vdem$MENA + 
+                     vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$southeast_asia + vdem$central_asia + vdem$landlocked + 
+                     vdem$area_log, data = vdem)
+
+model6c <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$communist + vdem$MENA + 
+                     vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$southeast_asia + vdem$central_asia + vdem$landlocked + 
+                     vdem$area_log + vdem$lat_log, data = vdem)
+# something is wrong with Pop_Density_log_2022, which is why I will exclude it from the analysis!
+
+stargazer(model5, model6a, model6b, model6c, type = "text", title = "Pop_log_2022 (IV) - V_Dem (DV) - betareg() - CVs Maximal")
+model6 <- model6c
+
+
+# Interaction Effects & Robustness Checks ---------------------------------
+
+
+# 7. Model Comparison -----------------------------------------------------
+
+stargazer(model3, model5, model6, model4, type = "text", title = "Model Comparison: Pop (IV) - V_Dem (DV) - 2022")
+
+# Next Steps - Proposals -------------------------------------------------------
+
+# 1. Check for multicollinearity
+# 2. Check for heteroskedasticity
+# 3. Check for normality of residuals
+# 4. Consider alternative specifications or transformations of variables
+# 5. Consider interaction effects or non-linear relationships
+# 6. Consider robustness checks or sensitivity analysis
+# 7. Consider additional control variables or model specifications
+# 8. Interpret the results and consider implications for theory
+
+
+# 8. Pop_log_2022 (IV) - V_Dem (DV) - felm() - CVs Extended ----------------
+
+# In R, the scale() function is used to standardise or centre the data. It can be used to scale the columns of a matrix or data frame,
+# so that they have zero mean and unit variance, often useful in data preprocessing for statistical analysis or machine learning. 
+# By default, it centres the data but you can specify scale = FALSE to only centre or center = FALSE to only scale.
 install.packages("lfe")
 library(lfe)
-
-model5d <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$landlocked + vdem$former_commu + vdem$area_log , data = vdem)
-
-model5e <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$landlocked + vdem$former_commu + vdem$area_log + vdem$lat_log, data = vdem)
-
-model5f <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$landlocked + vdem$former_commu + vdem$area_log +  vdem$lat_log + vdem$Pop_Density_2022, data = vdem)
-
-model5g <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$landlocked + vdem$former_commu + vdem$area_log + vdem$Pop_Density_2022 + vdem$lat_log, data = vdem)
-
-stargazer(model3, model5c, model5d, model5e, model5f, model5g, type = "text", title = "Pop_log (IV) - V_Dem (DV) with more CVs 2022")
-
-# Model 5d with area_log, but not lat or Pop_Density, is the best model is best
-
-## Testing the felm() function to deal with fixed effects
 #model3 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022, data = vdem)
 
 model3_felm_log_base <- felm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 | 0 |0 | iso3, data = vdem)
 
-model5_felm_log_max <- felm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$landlocked + vdem$former_commu + vdem$area_log + vdem$Pop_Density_2022 + vdem$lat_log | 0 |0 | iso3, data = vdem)
+model5_felm_log_max <- felm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$landlocked + vdem$communist + vdem$area_log + vdem$Pop_Density_2022 + vdem$lat_log | 0 |0 | iso3, data = vdem)
 
 model5_felm_log_fixed_base <- felm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 | vdem$sub_region |0 | iso3, data = vdem)
 
-model5_felm_log_fixed_max <- felm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$landlocked + vdem$former_commu + vdem$area_log + vdem$Pop_Density_2022 + vdem$lat_log | vdem$sub_region |0 | iso3, data = vdem)
+model5_felm_log_fixed_max <- felm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$landlocked + vdem$communist + vdem$area_log + vdem$Pop_Density_2022 + vdem$lat_log | vdem$sub_region |0 | iso3, data = vdem)
 
-model5_felm_log_fixed_max_max <- felm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$landlocked + vdem$former_commu + vdem$area_log + vdem$Pop_Density_2022 + vdem$lat_log | vdem$sub_region |0 | iso3, data = vdem)
+model5_felm_log_fixed_max_max <- felm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$landlocked + vdem$communist + vdem$area_log + vdem$Pop_Density_2022 + vdem$lat_log | vdem$sub_region |0 | iso3, data = vdem)
 
 # Alternative approach using lapply to work with a list of models
 models_list <- list(model5d, model5f, model5g, model5_felm_log_fixed_base, model5_felm_log_fixed_max, model5_felm_log_fixed_max_max)
@@ -314,44 +384,25 @@ stargazer(valid_models,
 # The results are worse in many ways, going back to betareg() models, maybe try glm()
 model5 <- model5d
 
-#### Next Steps: 
-# See how it is possible to include fixed effects in the betareg model, as the felm model is not working
-# maybe try fractional glm() model as well
-# Experiment a bit with the culture, the region and sub-region variables, see how they affect the model
-# when you find the best model, do some checks from underneath and then get to interpretation
-# add some graphs to the interpretation
 
-# Proposals:
-# 1. Check for multicollinearity
-# 2. Check for heteroskedasticity
-# 3. Check for normality of residuals
-# 4. Consider alternative specifications or transformations of variables
-# 5. Consider interaction effects or non-linear relationships
-# 6. Consider robustness checks or sensitivity analysis
-# 7. Consider additional control variables or model specifications
-# 8. Interpret the results and consider implications for theory
-
-
-
-#In R, the scale() function is used to standardise or centre the data. It can be used to scale the columns of a matrix or data frame so that they have zero mean and unit variance, often useful in data preprocessing for statistical analysis or machine learning. By default, it centres the data but you can specify scale = FALSE to only centre or center = FALSE to only scale.
 # Interaction Effects & Robustness Checks ---------------------------------
 
 
 
-# Adding even more CVs ----------------------------------------------------
+# 9. CVs region, subregion culture ----------------------------------------------------
 
 #model3, model5, model5d, model5e
 #model3 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022, data = vdem)
-#model5d <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$landlocked + vdem$former_commu + vdem$area_log , data = vdem)
-#model5e <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$landlocked + vdem$former_commu + vdem$area_log + vdem$lat_log, data = vdem)
-#model5f <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$landlocked + vdem$former_commu + vdem$area_log +  vdem$lat_log + vdem$Pop_Density_2022, data = vdem)
+#model5d <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$landlocked + vdem$communist + vdem$area_log , data = vdem)
+#model5e <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$landlocked + vdem$communist + vdem$area_log + vdem$lat_log, data = vdem)
+#model5f <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$landlocked + vdem$communist + vdem$area_log +  vdem$lat_log + vdem$Pop_Density_2022, data = vdem)
 
 # Adding more cultural variables
 unique(df_vdem$culture)
 table(df_vdem$culture)
-model6a <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$southeast_asia + vdem$central_asia + vdem$landlocked + vdem$former_commu + vdem$area_log, data = vdem) 
+model6a <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$southeast_asia + vdem$central_asia + vdem$landlocked + vdem$communist + vdem$area_log, data = vdem) 
 
-model6b <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$landlocked + vdem$former_commu + vdem$area_log + vdem$culture, data = vdem)
+model6b <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$landlocked + vdem$communist + vdem$area_log + vdem$culture, data = vdem)
 
 stargazer(model3, model5d, model6a, model6b, type = "text", title = "Pop_log (IV) - V_Dem (DV) with more CVs 2022")
 
@@ -363,19 +414,19 @@ table(df_vdem$Africa)
 table(df_vdem$Americas)
 table(df_vdem$Oceania)
 
-model6c <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$landlocked + vdem$former_commu + area_log + vdem$region, data = vdem)
+model6c <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$landlocked + vdem$communist + area_log + vdem$region, data = vdem)
 
 # Adding sub region variables
 unique(df_vdem$sub_region)
 table(df_vdem$sub_region)
 names(df_vdem)[(ncol(df_vdem)-50):ncol(df_vdem)] # names of last 50 columns
 
-#model6d <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$landlocked + vdem$former_commu + vdem$srEast_Central_Europe + 
+#model6d <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$landlocked + vdem$communist + vdem$srEast_Central_Europe + 
 #                    vdem$srWestern_Europe +vdem$srNordic + vdem$srSouthern_Europe + vdem$srBalkans + vdem$srNorth_Africa + vdem$srCentral_Asia + vdem$srEast_Asia + vdem$srMiddle_East + 
 #                   vdem$srSouth_Asia + vdem$srSoutheast_Asia + vdem$srWest_Africa + vdem$srEast_Africa + vdem$srCentral_Africa + vdem$srSouthern_Africa + vdem$srCarribbean + 
 #                  vdem$srCentral_America + vdem$srSouth_America + vdem$srOceania, data = vdem)
 
-model6d <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$landlocked + vdem$former_commu + area_log + vdem$sub_region, data = vdem)
+model6d <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$landlocked + vdem$communist + area_log + vdem$sub_region, data = vdem)
 
 stargazer(model5, model6a, model6b, model6c, model6d, type = "text", title = "Pop_log (IV) - V_Dem (DV) with max CVs 2022")
 
@@ -387,11 +438,11 @@ stargazer(model3, model5, model6, model6b, type = "text", title = "Pop_log (IV) 
 
 #model3 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022, data = vdem)
 
-#model5 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$landlocked + vdem$former_commu + vdem$area_log , data = vdem)
+#model5 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$landlocked + vdem$communist + vdem$area_log , data = vdem)
 
-#model6a <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$southeast_asia + vdem$central_asia + vdem$landlocked + vdem$former_commu + vdem$area_log, data = vdem) 
+#model6a <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$southeast_asia + vdem$central_asia + vdem$landlocked + vdem$communist + vdem$area_log, data = vdem) 
 
-#model6b <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$landlocked + vdem$former_commu + vdem$area_log + vdem$culture, data = vdem)
+#model6b <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$landlocked + vdem$communist + vdem$area_log + vdem$culture, data = vdem)
 
 # Interaction Effects & Robustness Checks ---------------------------------
 
@@ -401,19 +452,19 @@ stargazer(model3, model5, model6, model6b, type = "text", title = "Pop_log (IV) 
 
 #model3 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022, data = vdem)
 
-#model5 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$landlocked + vdem$former_commu + vdem$area_log , data = vdem)
+#model5 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$landlocked + vdem$communist + vdem$area_log , data = vdem)
 
-#model6a <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$southeast_asia + vdem$central_asia + vdem$landlocked + vdem$former_commu + vdem$area_log, data = vdem) 
+#model6a <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$southeast_asia + vdem$central_asia + vdem$landlocked + vdem$communist + vdem$area_log, data = vdem) 
 
-#model6b <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$landlocked + vdem$former_commu + vdem$area_log + vdem$culture, data = vdem)
+#model6b <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$landlocked + vdem$communist + vdem$area_log + vdem$culture, data = vdem)
 
 model3_fractional <- glm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022, family = quasibinomial(link = "logit"), data = vdem)
 
-model5_fractional <- glm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$landlocked + vdem$former_commu + vdem$area_log , family = quasibinomial(link = "logit"), data = vdem)
+model5_fractional <- glm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$landlocked + vdem$communist + vdem$area_log , family = quasibinomial(link = "logit"), data = vdem)
 
-model6_fractional <- glm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$southeast_asia + vdem$central_asia + vdem$landlocked + vdem$former_commu + vdem$area_log, family = quasibinomial(link = "logit"), data = vdem)
+model6_fractional <- glm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$MENA + vdem$sub_saharan_africa + vdem$latin_america + vdem$west_europe + vdem$southeast_asia + vdem$central_asia + vdem$landlocked + vdem$communist + vdem$area_log, family = quasibinomial(link = "logit"), data = vdem)
 
-model6b_fractional <- glm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$landlocked + vdem$former_commu + vdem$area_log + vdem$culture, family = quasibinomial(link = "logit"), data = vdem)
+model6b_fractional <- glm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$landlocked + vdem$communist + vdem$area_log + vdem$culture, family = quasibinomial(link = "logit"), data = vdem)
 
 stargazer(model3_fractional, model5_fractional, model6_fractional, type = "text", title = "Pop_log (IV) - V_Dem (DV) with max CVs 2022")
 
