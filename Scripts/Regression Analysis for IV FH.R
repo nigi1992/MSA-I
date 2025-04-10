@@ -201,116 +201,143 @@ modelHc <- polr(fh$`2022Status` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$islan
 stargazer(modelGc, modelHa, modelHb, modelHc, type = "text", title= "DV (FH Status) & IV (Log Pop) with CVs Maximal")
 modelH <- modelHc
 
-# 9. OLS Regression: DV (Pol Rights) & IV (Log Pop) with CVs --------------
-
-### Next steps:
-# 1. Finnish FH scripts DV (Pol Rights, PR_Rating, Civ Rights, CL_Rating) and IV (Log_Cat) - ONLY BENCHMARK!!!!!
+# 9. Pol Rights (DV) - Pop_log_2022 (IV) - OLS - CVs Benchmark --------------
 
 range(fh$`2022PR`)
-model7a_fh <- lm(fh$`2022PR` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022, data = fh)
 
-model7b_fh <- lm(fh$`2022PR` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$MENA + 
-                   fh$sub_saharan_africa + fh$latin_america + fh$west_europe + fh$communist + fh$landlocked, data = fh)
+# Model I: DV (2022PR) & IV (Pop_log_2022) with CVs (Log GDP per Capita, island_state, diffusion variable, communist)
+modelI1 <- lm(fh$`2022PR` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 , data = fh)
 
-model7c_fh <- lm(fh$`2022PR` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$MENA + 
-                   fh$sub_saharan_africa + fh$latin_america + fh$west_europe + fh$communist + fh$landlocked + 
-                   fh$area_log, data = fh)
-stargazer(model7a_fh, model7b_fh, model7c_fh, type = "text")
+modelI2 <- lm(fh$`2022PR` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state, data = fh)
+
+modelI3 <- lm(fh$`2022PR` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022, data = fh)
+
+modelI4 <- lm(fh$`2022PR` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$communist, data = fh)
+
+stargazer(modelI1, modelI2, modelI3, modelI4, type = "text", title = "Pop_log_2022 (IV) - 2022PR (DV) - OLS - CVs Benchmark")
+modelI <- modelI4
 
 
-# 10. Ordinal Logistic Regression polr(): DV (`2022PR rating`) & IV (Log Pop) with more regional CVs-----------------
+# 10.`2022PR rating` (DV) - Pop_log_2022 (IV) - polr() - CVs Benchmark-----------------
+
+# Model J: DV (2022PR rating) & IV (Pop_log_2022) with CVs Benchmark (Log GDP per Capita, island_state, diffusion variable, communist)
 
 fh$`2022PR rating` <- factor(fh$`2022PR rating`, levels = c(7, 6, 5, 4, 3, 2, 1), ordered = TRUE)
+levels(fh$`2022PR rating`)
 
-model8a_fh <- polr(fh$`2022PR rating` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022, data = fh)
+modelJa <- polr(fh$`2022PR rating` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022, data = fh, Hess = TRUE)
 
-model8b_fh <- polr(fh$`2022PR rating` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$MENA + 
-                   fh$sub_saharan_africa + fh$latin_america + fh$west_europe + fh$communist + fh$landlocked, data = fh)
+modelJb <- polr(fh$`2022PR rating` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state, data = fh, Hess = TRUE)
 
-model8c_fh <- polr(fh$`2022PR rating` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$MENA +
-                   fh$sub_saharan_africa + fh$latin_america + fh$west_europe + fh$communist + fh$landlocked + 
-                   fh$area_log, data = fh)
+modelJc <- polr(fh$`2022PR rating` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022, data = fh, Hess = TRUE)
 
-stargazer(model8a_fh, model8b_fh, model8c_fh, type = "text")
+modelJd <- polr(fh$`2022PR rating` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$communist, data = fh, Hess = TRUE)
 
-
-# 11. OLS Regression: DV (Civ Rights) & IV (Log Pop) with CVs ----------------------------------
-
-model9a_fh <- lm(fh$`2022CL` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022, data = fh)
-
-model9b_fh <- lm(fh$`2022CL` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$MENA + 
-                   fh$sub_saharan_africa + fh$latin_america + fh$west_europe + fh$communist + fh$landlocked, data = fh)
-
-model9c_fh <- lm(fh$`2022CL` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$MENA +
-                   fh$sub_saharan_africa + fh$latin_america + fh$west_europe + fh$communist + fh$landlocked + 
-                   fh$area_log, data = fh)
-
-stargazer(model9a_fh, model9b_fh, model9c_fh, type = "text")
+stargazer(modelJa, modelJb, modelJc, modelJd, type = "text", title= "DV (2022PR rating) & IV (Pop_log_2022) with CVs Benchmark")
+modelJ <- modelJd
 
 
-# 12. Ordinal Logistic Regression polr(): DV (`2022CL rating`) & IV (Log Pop) with more regional CVs-----------------
+# 11. Civ Rights (DV) - Pop_log_2022 (IV) - OLS - CVs Benchmark ----------------------------------
+
+range(fh$`2022CL`)
+
+# Model K: DV (2022CL) & IV (Pop_log_2022) with CVs (Log GDP per Capita, island_state, diffusion variable, communist)
+modelK1 <- lm(fh$`2022CL` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 , data = fh)
+
+modelK2 <- lm(fh$`2022CL` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state, data = fh)
+
+modelK3 <- lm(fh$`2022CL` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022, data = fh)
+
+modelK4 <- lm(fh$`2022CL` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$communist, data = fh)
+
+stargazer(modelK1, modelK2, modelK3, modelK4, type = "text", title = "Pop_log_2022 (IV) - 2022CL (DV) - OLS - CVs Benchmark")
+modelK <- modelK4
+
+# Interestingly the negative relationship seems to be much stronger and stat. sig. with Civ rights than with Pol rights. 
+# Exactly the opposite of Gerrig & Zarecki (2011), where Civ rights were not significant and weakest. Could it be that in the liberal dimension
+# the relationship is indeed neg. whereas in the electoral dimension it is positive? this would allow for a more nuanced interpretation of the correlation
+# between pop size and democracy levels.
+
+
+# 12. `2022CL rating` (DV) - Pop_log_2022 (IV) - polr() - CVs Benchmark-----------------
 
 fh$`2022CL rating` <- factor(fh$`2022CL rating`, levels = c(7, 6, 5, 4, 3, 2, 1), ordered = TRUE)
+levels(fh$`2022CL rating`)
 
-model10a_fh <- polr(fh$`2022CL rating` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022, data = fh)
+# Model L: DV (2022CL rating) & IV (Pop_log_2022) with CVs Benchmark (Log GDP per Capita, island_state, diffusion variable, communist)
 
-model10b_fh <- polr(fh$`2022CL rating` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$MENA + 
-                   fh$sub_saharan_africa + fh$latin_america + fh$west_europe + fh$communist + fh$landlocked, data = fh)
+modelLa <- polr(fh$`2022CL rating` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022, data = fh, Hess = TRUE)
 
-model10c_fh <- polr(fh$`2022CL rating` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$MENA +
-                   fh$sub_saharan_africa + fh$latin_america + fh$west_europe + fh$communist + fh$landlocked + 
-                   fh$area_log, data = fh)
+modelLb <- polr(fh$`2022CL rating` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state, data = fh, Hess = TRUE)
 
-stargazer(model10a_fh, model10b_fh, model10c_fh, type = "text")
+modelLc <- polr(fh$`2022CL rating` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022, data = fh, Hess = TRUE)
 
+modelLd <- polr(fh$`2022CL rating` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$communist, data = fh, Hess = TRUE)
 
-# 13. OLS Regression: DV (FH Total Score) & IV (Pop Cat) with CVs-------------------------------------------------------------------------
+stargazer(modelLa, modelLb, modelLc, modelLd, type = "text", title= "DV (2022PR rating) & IV (Pop_log_2022) with CVs Benchmark")
+modelL <- modelLd
+
+# Same here, very strong sig. neg. relationship. There is something here.
+
+# 13. FH Total Score (DV) - Pop_cat_2022 (IV) - OLS - CVs Benchmark-------------------------------------------------------------------------
+
+# Model M: DV (FH Total Score) & IV (Pop_cat_2022) with CVs Benchmark (Log GDP per Capita, island_state, diffusion variable, communist)
 
 contrasts(fh$Pop_cat_2022) <- contr.treatment(4)
 
-model11a_fh <- lm(fh$total_fh_2022 ~ fh$Pop_cat_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022, data = fh)
-coef_table11 <- tidy(model11a_fh)
-kable(coef_table11, digits = 3)
-model11b_fh <- lm(fh$total_fh_2022 ~ fh$Pop_cat_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$MENA + 
-                   fh$sub_saharan_africa + fh$latin_america + fh$west_europe + fh$communist + fh$landlocked, data = fh)
-coef_table12 <- tidy(model11b_fh) 
-kable(coef_table12, digits = 3)
-model11c_fh <- lm(fh$total_fh_2022 ~ fh$Pop_cat_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$MENA + 
-                   fh$sub_saharan_africa + fh$latin_america + fh$west_europe + fh$communist + fh$landlocked + 
-                   fh$area_log, data = fh)
-coef_table13 <- tidy(model11c_fh)
-kable(coef_table13, digits = 3)
-#stargazer(model11a_fh, model11b_fh, model11c_fh, type = "text")
-stargazer(model11a_fh, model11b_fh, type = "text",
+modelMa <- lm(fh$total_fh_2022 ~ fh$Pop_cat_2022 + fh$GDPpc_log_2022, data = fh)
+coef_tableA <- tidy(modelMa)
+kable(coef_tableA, digits = 3)
+
+modelMb <- lm(fh$total_fh_2022 ~ fh$Pop_cat_2022 + fh$GDPpc_log_2022 + fh$island_state, data = fh)
+coef_tableB <- tidy(modelMb)
+kable(coef_tableB, digits = 3)
+
+modelMc <- lm(fh$total_fh_2022 ~ fh$Pop_cat_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022, data = fh)
+coef_tableC <- tidy(modelMc)
+kable(coef_tableC, digits = 3)
+
+modelMd <- lm(fh$total_fh_2022 ~ fh$Pop_cat_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$communist, data = fh)
+coef_tableD <- tidy(modelMd)
+kable(coef_tableD, digits = 3)
+
+stargazer(modelMa, modelMb, modelMc, modelMd, type = "text",
           covariate.labels = c("Population (Small)", "Population (Large)", 
                                "Population (Huge)", "GDPpc log 2022", "Island State", 
-                               "Diffusion", "MENA", "Sub-saharan Africa", "Latin America", "Western Europe", "former Commies", "Landlocked", "Pop (Micro)/Intercept"),
-          title = "Pop_cat (IV) - FH Total Score (DV) with CVs 2022")
+                               "Diffusion", "Communist", "Pop (Micro)/Intercept"),
+          title = "Pop_cat (IV) - FH Total Score (DV) - OLS - CVs Benchmark")
+modelM <- modelMd
 
 
-# The best models so far-------------------------------------------------------------------------
+# 14. Model Comparison ----------------------------------------------------
 
-model3c_fh <- lm(fh$total_fh_2022 ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022, data = fh)
+# Pop_log_2022 (IV) - FH Total Score (DV) - OLS
+stargazer(modelC, modelD, modelE, type = "text", title = "Model Comparison - Pop_log_2022 (IV) - FH Total Score (DV) - OLS")
+
+# Pop_log_2022 (IV) - FH Status (DV) - polr()
+stargazer(modelF, modelG, modelH, type = "text", title = "Model Comparison - Pop_log_2022 (IV) - FH Status (DV) - polr()")
+
+# Pop_log_2022 (IV) - various FH DVs - All Benchmark
+stargazer(modelC, modelF, modelI, modelJ, modelK, modelL, type = "text", title = "Model Comparison - Pop_log_2022 (IV) - various FH DVs - All Benchmark")
 
 
-model5c_fh <- lm(fh$total_fh_2022 ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$MENA + 
-                   fh$sub_saharan_africa + fh$latin_america + fh$west_europe + fh$communist + fh$landlocked, data = fh)
+## Continuous-IV Tests Summary FH & Vdem
+# Benchmark
+stargazer(model3, modelC, modelF, modelI, modelJ, modelK, modelL, type = "text", title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - All Benchmark")
 
-model5d_fh <- lm(fh$total_fh_2022 ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$MENA + 
-                   fh$sub_saharan_africa + fh$latin_america + fh$west_europe + fh$communist + fh$landlocked + 
-                   fh$area_log, data = fh)
-stargazer(model3c_fh, model5c_fh, model5d_fh, type = "text")
+# Extended 
+stargazer(model5, modelD, modelG, type = "text", title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - CV Extended")
 
-model6a_fh <- polr(fh$`2022Status` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$MENA + 
-                     fh$sub_saharan_africa + fh$latin_america + fh$west_europe, data = fh)
-summary(model6a_fh)
-model6b_fh <- polr(fh$`2022Status` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$MENA +
-                     fh$sub_saharan_africa + fh$latin_america + fh$west_europe + fh$communist, data = fh)
-summary(model6b_fh)
-model6c_fh <- polr(fh$`2022Status` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$MENA +
-                     fh$sub_saharan_africa + fh$latin_america + fh$west_europe + fh$communist + fh$landlocked, data = fh)
-summary(model6c_fh)
-stargazer(model6a_fh, model6b_fh, model6c_fh, type = "text")
+# Maximal
+stargazer(model6, modelE, modelH, type = "text", title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - CV Maximal")
+
+
+## Categorical-IV Tests Summary FH & Vdem
+stargazer(model4, modelM, type = "text", 
+          #covariate.labels = c("Population (Small)", "Population (Large)", 
+                     #          "Population (Huge)", "GDPpc log 2022", "Island State", 
+                       #        "Diffusion", "Communist", "Pop (Micro)/Intercept"),
+          title = "Pop_cat (IV) - DV: 2022V_demFH betareg() & Total Score (OLS) - CVs Benchmark")
 
 
 # adding all cultures, regions, sub-regions------------------------------------------

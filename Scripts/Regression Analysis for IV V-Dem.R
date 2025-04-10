@@ -193,6 +193,12 @@ model3 <- model3d
 #However, this effect is relatively modest compared to economic development and regional diffusion effects. 
 #The relationship remains significant even when controlling for these important variables, suggesting population size has an independent effect on democratic governance.
 
+# Trying Fractional Logit Regression
+model3_fractional <- glm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + 
+                           vdem$communist, 
+                         family = quasibinomial(link = "logit"), data = vdem)
+summary(model3_fractional) # Not much better...
+
 # Interaction Effects & Robustness Checks ----------------
 model3d <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + 
                      vdem$communist, data = vdem)
@@ -229,36 +235,26 @@ vif(lm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_
 contrasts(vdem$Pop_cat_2022) <- contr.treatment(4)
 
 model4a <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 + vdem$GDPpc_log_2022, data = vdem)
-#summary(model4a)
 coef_table2 <- tidy(model4a)
 kable(coef_table2, digits = 3)
-#stargazer(model4a, type = "text", covariate.labels = c("Population (Small)", "Population (Large)", 
-#                              "Population (Huge)", "GDPpc log 2022", "Pop (Micro)/Intercept"))
 
 model4b <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 + vdem$GDPpc_log_2022 + vdem$island_state, data = vdem)
-#summary(model4b)
 coef_table3 <- tidy(model4b) 
 kable(coef_table3, digits = 3)
-#stargazer(model4b, type = "text", covariate.labels = c("Population (Small)", "Population (Large)", 
-#                              "Population (Huge)", "GDPpc log 2022", "Island State", "Pop (Micro)/Intercept"))
 
 model4c <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022, data = vdem)
-#summary(model4c)
 coef_table4 <- tidy(model4c)
 kable(coef_table4, digits = 3)
-#stargazer(model4c, type = "text", covariate.labels = c("Population (Small)", "Population (Large)", 
-#                              "Population (Huge)", "GDPpc log 2022", "Island State", "Diffusion", "Pop (Micro)/Intercept"))
 
 model4d <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + 
                      vdem$communist, data = vdem)
-summary(model4d)
 coef_table4b <- tidy(model4d)
 kable(coef_table4b, digits = 3)
 stargazer(model4a, model4b, model4c, model4d, type = "text",
           covariate.labels = c("Population (Small)", "Population (Large)", 
                                "Population (Huge)", "GDPpc log 2022", "Island State", 
                                "Diffusion", "Communist", "Pop (Micro)/Intercept"),
-          title = "Cat_pop_2022 (IV) - V_Dem (DV) - polr() - CVs Benchmark")
+          title = "Cat_pop_2022 (IV) - V_Dem (DV) - betareg() - CVs Benchmark")
 model4 <- model4d
 
 # Interaction Effects & Robustness Checks ----------------
@@ -340,7 +336,8 @@ model6 <- model6c
 
 # 7. Model Comparison -----------------------------------------------------
 
-stargazer(model3, model5, model6, model4, type = "text", title = "Model Comparison: Pop (IV) - V_Dem (DV) - 2022")
+# Pop_log_2022 (IV) - 2022V_Dem (DV) Models with CVs
+stargazer(model3, model5, model6, type = "text", title = "Model Comparison: Pop_log_2022 (IV) - 2022V_Dem (DV)")
 
 # Next Steps - Proposals -------------------------------------------------------
 
