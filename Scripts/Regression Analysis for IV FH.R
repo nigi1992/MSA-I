@@ -311,25 +311,39 @@ modelM <- modelMd
 
 # 14. Model Comparison ----------------------------------------------------
 
+library(tidyverse)
+#install.packages("betareg") 
+library(betareg)
+library(broom)
+library(knitr)
+#install.packages("MASS")
+library(MASS)
+library(stargazer)
 # Pop_log_2022 (IV) - FH Total Score (DV) - OLS
-stargazer(modelC, modelD, modelE, type = "text", title = "Model Comparison - Pop_log_2022 (IV) - FH Total Score (DV) - OLS")
+stargazer(modelC, modelD, modelE, type = "text", 
+          title = "Model Comparison - Pop_log_2022 (IV) - FH Total Score (DV) - OLS")
 
 # Pop_log_2022 (IV) - FH Status (DV) - polr()
-stargazer(modelF, modelG, modelH, type = "text", title = "Model Comparison - Pop_log_2022 (IV) - FH Status (DV) - polr()")
+stargazer(modelF, modelG, modelH, type = "text", 
+          title = "Model Comparison - Pop_log_2022 (IV) - FH Status (DV) - polr()")
 
 # Pop_log_2022 (IV) - various FH DVs - All Benchmark
-stargazer(modelC, modelF, modelI, modelJ, modelK, modelL, type = "text", title = "Model Comparison - Pop_log_2022 (IV) - various FH DVs - All Benchmark")
+stargazer(modelC, modelF, modelI, modelJ, modelK, modelL, type = "text", 
+          title = "Model Comparison - Pop_log_2022 (IV) - various FH DVs - All Benchmark")
 
 
 ## Continuous-IV Tests Summary FH & Vdem
 # Benchmark
-stargazer(model3, modelC, modelF, modelI, modelJ, modelK, modelL, type = "text", title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - All Benchmark")
+stargazer(model3, modelC, modelF, modelI, modelJ, modelK, modelL, type = "text", 
+          title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - All Benchmark")
 
 # Extended 
-stargazer(model5, modelD, modelG, type = "text", title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - CV Extended")
+stargazer(model5, modelD, modelG, type = "text", 
+          title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - CV Extended")
 
 # Maximal
-stargazer(model6, modelE, modelH, type = "text", title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - CV Maximal")
+stargazer(model6, modelE, modelH, type = "text", 
+          title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - CV Maximal")
 
 
 ## Categorical-IV Tests Summary FH & Vdem
