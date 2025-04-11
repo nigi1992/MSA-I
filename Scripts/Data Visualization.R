@@ -374,6 +374,8 @@ ggplot(control_values_modelC, aes(x = Pop_log_2022, y = predicted)) +
   theme(plot.title = element_text(hjust = 0.5))
 #ggsave(file = here("Output", "Predicted FH Total Score by Pop 2022.png"), width = 8, height = 6)
 
+plot(modelC, which = 1) # Residuals vs Fitted
+
 ## ** To Do:** ##
 # 1. Pol Rights (DV) - Pop_log_2022 (IV) - OLS - CVs Benchmark
 # 2. Civ Rights (DV) - Pop_log_2022 (IV) - OLS - CVs Benchmark
