@@ -1,5 +1,8 @@
 ### **Regression Analysis for IV FH** ###
 
+# Cleaning environment
+#rm(list = ls())
+
 # Importing the data
 library(readr)
 file_path_fh
@@ -31,12 +34,33 @@ levels(fh$Pop_cat_2022)
 fh$Pop_cat_2023 <- factor(fh$Pop_cat_2023, levels = c('Micro', 'Small', 'Large', 'Huge'), ordered = TRUE)
 is.factor(fh$Pop_cat_2022)
 
+# Transforming dummy variables into factors
+fh$landlocked <- factor(fh$landlocked, levels = c(0, 1))
+fh$island_state <- factor(fh$island_state, levels = c(0, 1))
+fh$communist <- factor(fh$communist, levels = c(0, 1))
+is.factor(fh$communist)
+is.factor(fh$landlocked)
+is.factor(fh$island_state)
+
+# Same for culture variables
+fh$MENA <- factor(fh$MENA, levels = c(0, 1))
+fh$sub_saharan_africa <- factor(fh$sub_saharan_africa, levels = c(0, 1))
+fh$latin_america <- factor(fh$latin_america, levels = c(0, 1))
+fh$west_europe <- factor(fh$west_europe, levels = c(0, 1))
+fh$central_asia <- factor(fh$central_asia, levels = c(0, 1))
+fh$southeast_asia <- factor(fh$southeast_asia, levels = c(0, 1))
+is.factor(fh$MENA)
+is.factor(fh$sub_saharan_africa)
+is.factor(fh$latin_america)
+is.factor(fh$west_europe)
+is.factor(fh$central_asia)
+is.factor(fh$southeast_asia)
+
 range(fh$Pop_log_2022)
 range(fh$total_fh_2022)
 range(fh$Pop_cat_2022)
 range(fh$`2022Status`) # character, not ordered! -> transformation necessary! NF < PF < F
 range(fh$GDPpc_log_2022)
-range(fh$island_state)
 range(fh$diffusion_fh_2022)
 range(fh$area_log)
 range(fh$lat_log)
@@ -102,6 +126,7 @@ modelC <- modelC4
 # Unlike V-dem Island_state has greater pos. effect and is more sig. On the other hand, diffusion variable has still positive effect, but
 # much less magnitude. I suspect this is due to the many small island states
 
+
 # 4. Pop_log_2022 (IV) - FH Total Score (DV) - OLS - CVs Extended (+ MENA, sub_saharan_africa, latin_america, west_europe, southeast_asia, central_asia) --------------
 
 # Model D: DV (FH Total Score) & IV (Log Pop) with more regional CVs (MENA, sub_saharan_africa, latin_america, west_europe, southeast_asia, central_asia)
@@ -160,6 +185,7 @@ modelFd <- polr(fh$`2022Status` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$islan
 stargazer(modelFa, modelFb, modelFc, modelFd, type = "text", title= "DV (FH Status) & IV (Log Pop) with CVs Benchmark")
 modelF <- modelFd
 
+
 # 7. Pop_log_2022 (IV) - FH Status (DV) - polr() - CVs Extended (+ MENA, sub_saharan_africa, latin_america, west_europe, southeast_asia, central_asia) -------------
 
 # Model G: DV (FH Total Score) & IV (Log Pop) with more regional CVs (MENA, sub_saharan_africa, latin_america, west_europe, southeast_asia, central_asia)
@@ -201,9 +227,11 @@ modelHc <- polr(fh$`2022Status` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$islan
 stargazer(modelGc, modelHa, modelHb, modelHc, type = "text", title= "DV (FH Status) & IV (Log Pop) with CVs Maximal")
 modelH <- modelHc
 
+
 # 9. Pol Rights (DV) - Pop_log_2022 (IV) - OLS - CVs Benchmark --------------
 
-range(fh$`2022PR`)
+range(fh$`2022PR`) # There negative values. This could be a problem for OLS regression.
+fh$PR_2022_recoded <- ifelse(fh$`2022PR` < 0, 0, fh$`2022PR`) # Creating a new variable to avoid overwriting original
 
 # Model I: DV (2022PR) & IV (Pop_log_2022) with CVs (Log GDP per Capita, island_state, diffusion variable, communist)
 modelI1 <- lm(fh$`2022PR` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 , data = fh)
@@ -214,8 +242,41 @@ modelI3 <- lm(fh$`2022PR` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_stat
 
 modelI4 <- lm(fh$`2022PR` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$communist, data = fh)
 
-stargazer(modelI1, modelI2, modelI3, modelI4, type = "text", title = "Pop_log_2022 (IV) - 2022PR (DV) - OLS - CVs Benchmark")
-modelI <- modelI4
+modelI5 <- lm(fh$PR_2022_recoded ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$communist, data = fh)
+
+stargazer(modelI1, modelI2, modelI3, modelI4, modelI5, type = "text", title = "Pop_log_2022 (IV) - 2022PR (DV) - OLS - CVs Benchmark")
+modelI <- modelI5
+
+
+# Generate standard diagnostic plots (Residuals vs Fitted, Q-Q, Scale-Location, Residuals vs Leverage)
+autoplot(modelI, which = 1:4, ncol = 2, label.id = NULL) + # Use which=1:6 for all 6 plots
+  theme_bw() 
+
+
+# betareg() for 2022PR ----------------------------------------------------
+
+# betareg() option
+#fh$PR_01_scaled <- fh$PR_2022_recoded / 40
+#n <- nrow(fh) # Get sample size
+#rm(n)
+#fh$PR_01_squeezed <- (fh$PR_01_scaled * (196 - 1) + 0.5) / 196 # Squeeze to [0, 1] range
+
+#library(betareg)
+#modelI_beta_squeezed <- 
+  #betareg(PR_01_squeezed ~ Pop_log_2022 + GDPpc_log_2022 + island_state + diffusion_fh_2022 + communist, data = fh, link = "logit") # logit link is common
+#stargazer(modelI, modelI_beta_squeezed, type = "text", title = "Pop_log_2022 (IV) - 2022PR (DV) - OLS - CVs Benchmark")
+#modelI <- modelI
+
+# Assuming modelI_beta_squeezed is your fitted betareg model
+
+# Generate diagnostic plots using base R plot function
+# which=1:4 might select specific plots, or omit 'which' to see the default sequence
+# oma and mar might need adjusting depending on your plotting window
+#par(mfrow=c(2,2), oma = c(0, 0, 2, 0), mar = c(4, 4, 2, 1)) # Set up 2x2 plot layout
+#plot(modelI_beta_squeezed, which = 1:4, type = "pearson") # Or type="deviance", etc.
+
+# Reset plotting parameters when done
+#par(mfrow=c(1,1), oma = c(0, 0, 0, 0), mar = c(5, 4, 4, 2) + 0.1)
 
 
 # 10.`2022PR rating` (DV) - Pop_log_2022 (IV) - polr() - CVs Benchmark-----------------
@@ -279,6 +340,7 @@ modelL <- modelLd
 
 # Same here, very strong sig. neg. relationship. There is something here.
 
+
 # 13. FH Total Score (DV) - Pop_cat_2022 (IV) - OLS - CVs Benchmark-------------------------------------------------------------------------
 
 # Model M: DV (FH Total Score) & IV (Pop_cat_2022) with CVs Benchmark (Log GDP per Capita, island_state, diffusion variable, communist)
@@ -309,7 +371,7 @@ stargazer(modelMa, modelMb, modelMc, modelMd, type = "text",
 modelM <- modelMd
 
 
-# 14. Model Comparison ----------------------------------------------------
+# 14. Model Comparisons ----------------------------------------------------
 
 library(tidyverse)
 #install.packages("betareg") 
@@ -319,6 +381,8 @@ library(knitr)
 #install.packages("MASS")
 library(MASS)
 library(stargazer)
+
+## Only FH Variables
 # Pop_log_2022 (IV) - FH Total Score (DV) - OLS
 stargazer(modelC, modelD, modelE, type = "text", 
           title = "Model Comparison - Pop_log_2022 (IV) - FH Total Score (DV) - OLS")
@@ -331,6 +395,8 @@ stargazer(modelF, modelG, modelH, type = "text",
 stargazer(modelC, modelF, modelI, modelJ, modelK, modelL, type = "text", 
           title = "Model Comparison - Pop_log_2022 (IV) - various FH DVs - All Benchmark")
 
+
+# FH & Vdem Variables (unscaled) ------------------------------------------
 
 ## Continuous-IV Tests Summary FH & Vdem
 # Benchmark
@@ -348,37 +414,58 @@ stargazer(model6, modelE, modelH, type = "text",
 
 ## Categorical-IV Tests Summary FH & Vdem
 stargazer(model4, modelM, type = "text", 
-          #covariate.labels = c("Population (Small)", "Population (Large)", 
-                     #          "Population (Huge)", "GDPpc log 2022", "Island State", 
-                       #        "Diffusion", "Communist", "Pop (Micro)/Intercept"),
-          title = "Pop_cat (IV) - DV: 2022V_demFH betareg() & Total Score (OLS) - CVs Benchmark")
+          covariate.labels = c("Population (Small)", "Population (Large)", "Population (Huge)",
+          "GDPpc log 2022", "Island State", "Diffusion", "Communist",
+          "Population (Small)", "Population (Large)", "Population (Huge)",
+          "GDPpc log 2022", "Island State", "Diffusion",  "Communist",
+          "Pop (Micro)/Intercept"),
+          title = "Pop_cat (IV) - DV: 2022 V_dem betareg() & FH Total Score (OLS) - CVs Benchmark")
 
 
-# adding all cultures, regions, sub-regions------------------------------------------
+# FH & Vdem Variables (scaled) --------------------------------------------
 
-model5h_fh <- lm(fh$total_fh_2022 ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$communist + fh$landlocked + 
-                   fh$area_log + fh$lat_log + fh$Pop_Density_2022 + fh$culture, data = fh)
+## Continuous-IV Tests Summary FH & Vdem
+# Benchmark
+stargazer(model3_scaled, modelC, modelF, modelI, modelJ, modelK, modelL, type = "text", 
+          title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - All Benchmark")
 
-model5i_fh <- lm(fh$total_fh_2022 ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$communist + fh$landlocked +
-                   fh$area_log + fh$lat_log + fh$Pop_Density_2022 + fh$region, data = fh)
+# Extended 
+stargazer(model5_scaled, modelD, modelG, type = "text", 
+          title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - CV Extended")
 
-model5j_fh <- lm(fh$total_fh_2022 ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$communist + fh$landlocked +
-                   fh$area_log + fh$lat_log + fh$Pop_Density_2022 + fh$sub_region, data = fh)
-
-stargazer(model5h_fh, model5i_fh, model5j_fh, type = "text")
-
+# Maximal
+stargazer(model6_scaled, modelE, modelH, type = "text", 
+          title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - CV Maximal")
 
 
-# adding all cultures, regions, sub-regions-------------------------------------------------------------------------
+## Categorical-IV Tests Summary FH & Vdem
+stargazer(model4_scaled, modelM, type = "text", 
+          covariate.labels = c("Population (Small)", "Population (Large)", "Population (Huge)",
+                               "GDPpc log 2022", "Island State", "Diffusion scaled", "Communist",
+          "Population (Small)", "Population (Large)", "Population (Huge)",
+          "GDPpc log 2022", "Island State", "Diffusion",  "Communist",
+          "Pop (Micro)/Intercept"),
+          title = "Pop_cat (IV) - DV: 2022 V_dem betareg() & FH Total Score (OLS) - CVs Benchmark")
 
-model6h_fh <- polr(fh$`2022Status` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + 
-                     fh$communist + fh$landlocked + fh$area_log + fh$lat_log + fh$Pop_Density_2022 + fh$culture, data = fh)
 
-model6i_fh <- polr(fh$`2022Status` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 +
-                     fh$communist + fh$landlocked + fh$area_log + fh$lat_log + fh$Pop_Density_2022 + fh$region, data = fh)
 
-model6j_fh <- polr(fh$`2022Status` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 +
-                     fh$communist + fh$landlocked + fh$area_log + fh$lat_log + fh$Pop_Density_2022 + fh$sub_region, data = fh)
+# 15. Saving Tables --------------------------------------------------------
 
-stargazer(model6h_fh, model6i_fh, model6j_fh, type = "text")
+# Save the table as a text file
+#stargazer(model3_scaled, modelC, modelF, modelI, modelJ, modelK, modelL,
+     #     type = "text", # Output format is text
+      #    title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - All Benchmark",
+       #   out = here("Output", "table.txt")) # Specify the output file name
+
+#ggsave(file = here("Output", "table.txt"), width = 8, height = 6)
+
+#library(modelsummary)
+# save as text file
+#modelsummary(
+# list("Model 1" = model3_scaled, "Model 2" = modelC, "Model 3" = modelF, 
+#     "Model 4" = modelI, "Model 5" = modelJ, "Model 6" = modelK, "Model 7" = modelL),
+#output = here("Output", "table.txt"),
+#title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - All Benchmark",
+#stars = TRUE)
+
 

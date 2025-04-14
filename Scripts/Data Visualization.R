@@ -47,7 +47,7 @@ ranking_vdem <- left_join(ranking_vdem_score, ranking_vdem_pop, by = "country_na
 library(ggplot2)
 library(here)
 
-# 1. Simple Regressions: Pop 2022 (IV) - V-Dem (DV), No CV ---------------------------------------------
+# 1. Simple Regressions: Pop 2022 (IV) - V-Dem (DV), No CV (unscaled) ---------------------------------------------
 
 # Plotting Model 1: Pop_log_2022
 ggplot(vdem, aes(x = Pop_log_2022, y = `2022V_Dem`)) +
@@ -71,6 +71,33 @@ ggplot(vdem, aes(x = Pop_log_2022, y = `2022V_Dem`, color=`2022V_Dem`)) +
   theme(plot.title = element_text(hjust = 0.5))+
   theme_minimal()
 
+
+# Simple Regressions: Pop 2022 (IV) - V-Dem (DV), No CV (scaled) ----------
+
+# Plotting Model 1: Pop_log_2022
+ggplot(vdem, aes(x = Pop_log_2022, y = `2022V_Dem_scaled`)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE) +
+  labs(title = "Democracy Score (V-Dem) by Population Size (ln)",
+       x = "Population Size (ln) for 2022",
+       y = "V-Dem LDI Score for 2022") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Plotting Model 1: Pop_log_2022 with color and country labels
+ggplot(vdem, aes(x = Pop_log_2022, y = `2022V_Dem_scaled`, color=`2022V_Dem`)) +
+  geom_point(size=0.5,alpha = 0.3) +
+  geom_text(data = vdem, aes(x = Pop_log_2022, y = `2022V_Dem_scaled`, label = country_name), 
+            check_overlap = TRUE, size = 3, hjust = 0.5, vjust = -0.5) +
+  geom_smooth(method = "lm", se = TRUE) +
+  labs(title = "Democracy Score (V-Dem) by Population Size (ln)",
+       x = "Population Size (ln) for 2022",
+       y = "V-Dem LDI Score for 2022",
+       color = "V-Dem Score 2022") +
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme_minimal()
+
+
+# Pop_cat_2022 ------------------------------------------------------------
 
 # Plotting Model 2: Pop_cat_2022
 ggplot(vdem, aes(x = Pop_cat_2022, y = `2022V_Dem`)) +
@@ -103,7 +130,30 @@ ggplot(vdem, aes(x = Pop_cat_2022, y = `2022V_Dem`, color=Pop_cat_2022)) +
   theme_grey() +
   theme(plot.title = element_text(hjust = 0.5))
 
+# Plotting Model 2 (scaled V-dem score): Pop_cat_2022 with color and country labels
+ggplot(vdem, aes(x = Pop_cat_2022, y = `2022V_Dem_scaled`, color=Pop_cat_2022)) +
+  geom_boxplot(alpha=0.7)+
+  geom_jitter(width = 0.2, alpha = 0.5) +
+  geom_text(data = 
+              #subset(vdem, `2022V_Dem` > 0.65 | `2022V_Dem` < 0.175), 
+              vdem, aes(x = Pop_cat_2022, y = `2022V_Dem_scaled`, label = country_name),
+            color = "black", fontface = "bold", 
+            check_overlap = TRUE, size = 3, hjust = 0.5, vjust = -0.5, show.legend = FALSE) +
+  scale_color_manual(
+    values = c("Micro"="green4", "Small" = "gold", "Large" = "orange2", "Huge" = "orangered2")
+  ) +
+  scale_fill_manual(
+    name = "Population Categories", # Legend title (matches color)
+    values = c("Micro"="green4", "Small" = "gold", "Large" = "orange2", "Huge" = "orangered2")
+  ) +
+  labs(title = "Democracy Score (V-Dem) by Population Category (Ordered Logit)",
+       x = "2022 Population Categories",
+       y = "V-Dem LDI Score for 2022",
+       color = "Population Categories") +
+  theme_grey() +
+  theme(plot.title = element_text(hjust = 0.5))
 
+# Plotting Model 1 Pop_cat_2022 with and without intercept for illustration purposes------------------------
 
 # Plotting Model 1 Pop_cat_2022 with and without intercept for illustration purposes
 ggplot(vdem, aes(x = Pop_cat_2022, y = `2022V_Dem`)) +
@@ -123,20 +173,23 @@ ggplot(vdem, aes(x = Pop_cat_2022, y = `2022V_Dem`)) +
 # no worries if it breaks!
 
 
-# 2. betareg() Regression: Pop 2022 (IV) - V-Dem (DV), with CVs --------
+# 2. betareg() Regression: Pop 2022 (IV) - V-Dem (DV), with CVs Benchmark (unscaled) --------
 
 library(betareg)
 
 # Define a sequence of values for the independent variable
 plot_model3 <- seq(min(vdem$Pop_log_2022, na.rm = TRUE), max(vdem$Pop_log_2022, na.rm = TRUE), length.out = 175)
 
-# Create a new data frame with fixed values for the control variables
+# Calculate modes (simplest way for 0/1: use table)
+island_mode <- as.numeric(names(which.max(table(vdem$island_state))))
+communist_mode <- as.numeric(names(which.max(table(vdem$communist))))
+
 control_values_model3 <- data.frame(
-  Pop_log_2022 = plot_model3, # using the sequence of values for Pop_log_2022
-  GDPpc_log_2022 = mean(vdem$GDPpc_log_2022, na.rm = TRUE), # fixing GDPpc_log_2022 at its mean
-  island_state = median(vdem$island_state, na.rm = TRUE),   # fixing island_state at its median
-  diffusion_2022 = mean(vdem$diffusion_2022, na.rm = TRUE), # fixing diffusion_2022 at its mean
-  communist = median(vdem$communist, na.rm = TRUE)          # fixing communist at its median
+  Pop_log_2022 = plot_model3, 
+  GDPpc_log_2022 = mean(vdem$GDPpc_log_2022, na.rm = TRUE), 
+  island_state = island_mode, # Fix at mode
+  diffusion_2022 = mean(vdem$diffusion_2022, na.rm = TRUE), 
+  communist = communist_mode # Fix at mode
 )
 
 # Predict the dependent variable using the model
@@ -159,8 +212,8 @@ ggplot(control_values_model3, aes(x = Pop_log_2022, y = predicted)) +
 
 # From afar with country labels
 ggplot(control_values_model3, aes(x = Pop_log_2022, y = predicted, color = predicted)) +
-  #geom_smooth(method = "lm", se = TRUE, color = "blue") +
-  geom_smooth(method = "loess", se = TRUE, span=0.75, color = "blue") +
+  geom_smooth(method = "lm", se = TRUE, color = "blue") +
+  #geom_smooth(method = "loess", se = TRUE, span=0.75, color = "blue") +
   geom_point(data = vdem, aes(x = Pop_log_2022, y = `2022V_Dem`, color= `2022V_Dem`), size=0.5, alpha = 0.5) +
   geom_text(data = vdem, aes(x = Pop_log_2022, y = `2022V_Dem`, color= `2022V_Dem`,label = country_name),
             fontface = "bold", 
@@ -172,17 +225,81 @@ ggplot(control_values_model3, aes(x = Pop_log_2022, y = predicted, color = predi
   theme_minimal() 
 
 # Close with country labels
-ggplot(control_values_model3, aes(x = Pop_log_2022, y = predicted, color = predicted)) +
-  #geom_smooth(method = "lm", se = TRUE, color = "blue") +
-  geom_smooth(method = "loess", se = TRUE, span=0.75, color = "blue") +
-  geom_point(data = subset(vdem, `2022V_Dem` > 0.25 & `2022V_Dem` < 0.45), aes(x = Pop_log_2022, y = `2022V_Dem`, color= `2022V_Dem`), size=0.5, alpha = 0.5) +
-  geom_text(data = subset(vdem, `2022V_Dem` > 0.25 & `2022V_Dem` < 0.45), aes(x = Pop_log_2022, y = `2022V_Dem`, color= `2022V_Dem`,label = country_name),
+ggplot(control_values_model3, aes(x = Pop_log_2022, y = predicted)) +
+  geom_smooth(method = "lm", se = TRUE, color = "blue") +
+  #geom_smooth(method = "loess", se = TRUE, span=0.75, color = "blue") +
+  geom_point(data = subset(vdem, `2022V_Dem` >= 0.25 & `2022V_Dem` <= 0.45), aes(x = Pop_log_2022, y = `2022V_Dem`), size=0.5, alpha = 0.5) +
+  geom_text(data = subset(vdem, `2022V_Dem` >= 0.25 & `2022V_Dem` <= 0.45), aes(x = Pop_log_2022, y = `2022V_Dem`,label = country_name),
             fontface = "bold", 
             check_overlap = TRUE, size = 3, hjust = 0.5, vjust = -0.5, show.legend = FALSE) +
   labs(title = "Effect of Population (Log) on V-Dem 2022 Score",
     x = "Log of Population (2022)",
     y = "Predicted V-Dem 2022 Score",
     color = "V-Dem Score 2022") +
+  theme_minimal() 
+
+
+# betareg() Regression: Pop 2022 (IV) - V-Dem (DV), with CVs Benchmark (scaled) --------
+
+library(betareg)
+
+# Define a sequence of values for the independent variable
+plot_model3_scaled <- seq(min(vdem$Pop_log_2022, na.rm = TRUE), max(vdem$Pop_log_2022, na.rm = TRUE), length.out = 175)
+
+# Calculate modes (simplest way for 0/1: use table)
+island_mode <- as.numeric(names(which.max(table(vdem$island_state))))
+communist_mode <- as.numeric(names(which.max(table(vdem$communist))))
+
+control_values_model3_scaled <- data.frame(
+  Pop_log_2022 = plot_model3_scaled, 
+  GDPpc_log_2022 = mean(vdem$GDPpc_log_2022, na.rm = TRUE), 
+  island_state = island_mode, # Fix at mode
+  diffusion_2022_scaled = mean(vdem$diffusion_2022_scaled, na.rm = TRUE), 
+  communist = communist_mode # Fix at mode
+)
+
+# Predict the dependent variable using the model
+control_values_model3_scaled$predicted <- predict(model3_scaled, newdata = control_values_model3_scaled, type = "response")
+
+# Plotting the predicted values
+ggplot(control_values_model3_scaled, aes(x = Pop_log_2022, y = predicted)) +
+  geom_smooth(method = "lm", se = TRUE, color = "blue") +
+  #geom_smooth(method = "loess", se = TRUE, span=0.75, color = "blue") +
+  labs(
+    title = "Effect of Population (Log) on V-Dem 2022 Score",
+    x = "Log of Population (2022)",
+    y = "Predicted V-Dem 2022 Score"
+  ) +
+  theme_minimal()  
+
+# From afar with country labels
+ggplot(control_values_model3_scaled, aes(x = Pop_log_2022, y = predicted)) +
+  geom_smooth(method = "lm", se = TRUE, color = "blue") +
+  #geom_smooth(method = "loess", se = TRUE, span=0.75, color = "blue") +
+  geom_point(data = vdem, aes(x = Pop_log_2022, y = `2022V_Dem_scaled`, color=`2022V_Dem_scaled`), size=0.5, alpha = 0.5) +
+  geom_text(data = vdem, aes(x = Pop_log_2022, y = `2022V_Dem_scaled`, color= `2022V_Dem_scaled`,label = country_name),
+            fontface = "bold", 
+            check_overlap = TRUE, size = 3, hjust = 0.5, vjust = -0.5, show.legend = FALSE) +
+  labs(title = "Effect of Population (Log) on V-Dem 2022 Score",
+       x = "Log of Population (2022)",
+       y = "Predicted V-Dem 2022 Score",
+       color = "V-Dem Score 2022") +
+  theme_minimal() 
+
+# Close with country labels
+ggplot(control_values_model3_scaled, aes(x = Pop_log_2022, y = predicted)) +
+  geom_smooth(method = "lm", se = TRUE, color = "blue") +
+  #geom_smooth(method = "loess", se = TRUE, span=0.75, color = "blue") +
+  geom_point(data = subset(vdem, `2022V_Dem_scaled` >= 25 & `2022V_Dem_scaled` <= 45), 
+             aes(x = Pop_log_2022, y = `2022V_Dem_scaled`), size=0.5, alpha = 0.5) +
+  geom_text(data = subset(vdem, `2022V_Dem_scaled` >= 25 & `2022V_Dem_scaled` <= 45), 
+            aes(x = Pop_log_2022, y = `2022V_Dem_scaled`,label = country_name),
+            fontface = "bold", 
+            check_overlap = TRUE, size = 3, hjust = 0.5, vjust = -0.5, show.legend = FALSE) +
+  labs(title = "Effect of Population (Log) on V-Dem 2022 Score",
+       x = "Log of Population (2022)",
+       y = "Predicted V-Dem 2022 Score",
+       color = "V-Dem Score 2022") +
   theme_minimal() 
 
 
@@ -225,6 +342,8 @@ ggplot(fh, aes(x = fh$Pop_log_2022, y = fh$total_fh_2022, color = `2022Status`))
        color = "FH Status 2022")  +
   theme(plot.title = element_text(hjust = 0.5))
 
+
+# Pop_cat_2022 ------------------------------------------------------------
 
 # Plotting Model M: Pop_cat_2022
 ggplot(fh, aes(x = Pop_cat_2022, y = `total_fh_2022`)) +
@@ -292,22 +411,23 @@ ggplot(plot_fh_DV_status_long, aes(x = Pop_log_2022, y = Probability, color = St
 #ggsave(file = here("Output", "Predicted Prob Status 2022.png"), width = 8, height = 6)
 
 
-
-
-# 5. OLS Regression: Pop 2022 (IV) - FH Total Score (DV), with CVs--------
+# 5. OLS Regression: Pop 2022 (IV) - FH Total Score (DV), with CVs Benchmark--------
 
 # modelC4 <- lm(fh$total_fh_2022 ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$communist, data = fh)
 
 # Define a sequence of values for the independent variable
 plot_modelC <- seq(min(fh$Pop_log_2022, na.rm = TRUE), max(fh$Pop_log_2022, na.rm = TRUE), length.out = 196)
 
-# Create a new data frame with fixed values for the control variables
+# Calculate modes (simplest way for 0/1: use table)
+island_mode <- as.numeric(names(which.max(table(fh$island_state))))
+communist_mode <- as.numeric(names(which.max(table(fh$communist))))
+
 control_values_modelC <- data.frame(
-  Pop_log_2022 = plot_modelC, # using the sequence of values for Pop_log_2022
-  GDPpc_log_2022 = mean(fh$GDPpc_log_2022, na.rm = TRUE), # fixing GDPpc_log_2022 at its mean
-  island_state = median(fh$island_state, na.rm = TRUE),   # fixing island_state at its median
-  diffusion_2022 = mean(fh$diffusion_fh_2022, na.rm = TRUE), # fixing diffusion_2022 at its mean
-  communist = median(fh$communist, na.rm = TRUE)          # fixing communist at its median
+  Pop_log_2022 = plot_modelC, 
+  GDPpc_log_2022 = mean(fh$GDPpc_log_2022, na.rm = TRUE), 
+  island_state = island_mode, # Fix at mode
+  diffusion_fh_2022 = mean(fh$diffusion_fh_2022, na.rm = TRUE), 
+  communist = communist_mode # Fix at mode
 )
 
 # Predict the dependent variable using the model
@@ -319,7 +439,7 @@ ggplot(control_values_modelC, aes(x = Pop_log_2022, y = predicted)) +
   geom_smooth(method = "lm", se = TRUE, color = "blue") +
   #geom_smooth(method = "loess", se = TRUE, span=1, color = "blue") +
   labs(
-    title = "Effect of Population (Log) on FH Total Score",
+    title = "Effect of Population (Log) on predicted FH Total Score",
     x = "Log of Population (2022)",
     y = "Predicted FH Total Score"
   ) +
@@ -354,17 +474,13 @@ ggplot(control_values_modelC, aes(x = Pop_log_2022, y = predicted)) +
   #geom_line(color = "blue", size = 1) +
   #geom_smooth(method = "loess", se = TRUE, span=1, color = "blue") +
   geom_smooth(method = "lm", se = TRUE, color = "blue") +
-  geom_point(data = subset(fh, `total_fh_2022` > 50.00 & `total_fh_2022` < 70), aes(x = Pop_log_2022, y = `total_fh_2022`),size=0.5,alpha = 0.3,
+  geom_point(data = subset(fh, `total_fh_2022` >= 50.00 & `total_fh_2022` <= 70), aes(x = Pop_log_2022, y = `total_fh_2022`),size=0.5,alpha = 0.3,
              #color = c("orangered", "dodgerblue2", "green4")[as.numeric(fh$`2022Status`)],
              ) +
-  geom_text(data = subset(fh, `total_fh_2022` > 50.00 & `total_fh_2022` < 70), aes(x = Pop_log_2022, y = `total_fh_2022`, label = country_name),
+  geom_text(data = subset(fh, `total_fh_2022` >= 50.00 & `total_fh_2022` <= 70), aes(x = Pop_log_2022, y = `total_fh_2022`, label = country_name),
             fontface = "bold",
             #color = c("orangered", "dodgerblue2", "green4")[as.numeric(fh$`2022Status`)],
             check_overlap = TRUE, size = 3, hjust = 0.5, vjust = -0.5, alpha=2, show.legend = FALSE) +
-  scale_color_manual(
-    values = c("F" = "green4", "PF" = "dodgerblue2", "NF" = "orangered"),
-    labels = c("F" = "Free", "PF" = "Partly Free", "NF" = "Not Free")
-  ) +
   labs(
     title = "Effect of Population (Log) on FH Total Score",
     x = "Log of Population (2022)",
@@ -376,9 +492,396 @@ ggplot(control_values_modelC, aes(x = Pop_log_2022, y = predicted)) +
 
 plot(modelC, which = 1) # Residuals vs Fitted
 
+
+# 6.  Pol Rights (DV) - Pop_log_2022 (IV) - OLS - CVs Benchmark-------------------
+
+# modelI4 <- lm(fh$`2022PR` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$communist, data = fh)
+
+# Plotting Pol Rights (DV) - Pop_log_2022 (IV) - Simple - No CVs
+ggplot(fh, aes(x = fh$Pop_log_2022, y = fh$`2022PR`)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE, alpha=0.25) +
+  labs(title = "Political Rights Score (FH) by Population Size (ln)",
+       x = "Population Size (ln) for 2022",
+       y = "Political Rights Score (PR) for 2022")  +
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+# Plotting Pol Rights (DV) - Pop_log_2022 (IV) - Simple - No CVs
+ggplot(fh, aes(x = fh$Pop_log_2022, y = fh$`2022PR`)) +
+  geom_point(size=0.5,alpha = 0.3) +
+  geom_text(data = fh, aes(x = Pop_log_2022, y = fh$`2022PR`, label = country_name),
+            color = c("orangered", "dodgerblue2", "green4")[as.numeric(fh$`2022Status`)],
+            check_overlap = TRUE, size = 3, hjust = 0.5, vjust = -0.5, alpha=2, show.legend = FALSE) +
+  geom_smooth(method = "lm", se = TRUE, alpha=0.25) +
+  scale_color_manual(
+    values = c("F" = "green4", "PF" = "dodgerblue2", "NF" = "orangered"),
+    labels = c("F" = "Free", "PF" = "Partly Free", "NF" = "Not Free")
+  ) +
+  labs(title = "Political Rights Score (FH) by Population Size (ln)",
+       x = "Population Size (ln) for 2022",
+       y = "Political Rights Score (PR) for 2022",
+       color = "FH Status 2022")  +
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+# Plotting Pol Rights (DV) - Pop_log_2022 (IV) - Simple - No CVs
+ggplot(fh, aes(x = fh$Pop_log_2022, y = fh$`2022PR`, color= fh$`2022PR`)) +
+  geom_point(size=0.5,alpha = 0.3) +
+  geom_text(data = fh, aes(x = Pop_log_2022, y = fh$`2022PR`, label = country_name),
+            #color = c("orangered", "dodgerblue2", "green4")[as.numeric(fh$`2022Status`)],
+            check_overlap = TRUE, size = 3, hjust = 0.5, vjust = -0.5, alpha=2, show.legend = FALSE) +
+  geom_smooth(method = "lm", se = TRUE, alpha=0.25) +
+  labs(title = "Political Rights Score (FH) by Population Size (ln)",
+       x = "Population Size (ln) for 2022",
+       y = "Political Rights Score (PR) for 2022",
+       color = "PR Rights 2022"
+       )  +
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+# No negative PR Values ---------------------------------------------------
+
+# modelI5 <- lm(fh$PR_2022_recoded ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$communist, data = fh)
+
+# Plotting Pol Rights (DV) - Pop_log_2022 (IV) - Simple - No CVs
+ggplot(fh, aes(x = fh$Pop_log_2022, y = fh$PR_2022_recoded)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE, alpha=0.25) +
+  labs(title = "Political Rights Score (FH) by Population Size (ln)",
+       x = "Population Size (ln) for 2022",
+       y = "Political Rights Score (PR) for 2022")  +
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+# Plotting Pol Rights (DV) - Pop_log_2022 (IV) - Simple - No CVs
+ggplot(fh, aes(x = fh$Pop_log_2022, y = fh$PR_2022_recoded)) +
+  geom_point(size=0.5,alpha = 0.3) +
+  geom_text(data = fh, aes(x = Pop_log_2022, y = fh$PR_2022_recoded, label = country_name),
+            color = c("orangered", "dodgerblue2", "green4")[as.numeric(fh$`2022Status`)],
+            check_overlap = TRUE, size = 3, hjust = 0.5, vjust = -0.5, alpha=2, show.legend = FALSE) +
+  geom_smooth(method = "lm", se = TRUE, alpha=0.25) +
+  scale_color_manual(
+    values = c("F" = "green4", "PF" = "dodgerblue2", "NF" = "orangered"),
+    labels = c("F" = "Free", "PF" = "Partly Free", "NF" = "Not Free")
+  ) +
+  labs(title = "Political Rights Score (FH) by Population Size (ln)",
+       x = "Population Size (ln) for 2022",
+       y = "Political Rights Score (PR) for 2022",
+       color = "FH Status 2022")  +
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+# Plotting Pol Rights (DV) - Pop_log_2022 (IV) - Simple - No CVs
+ggplot(fh, aes(x = fh$Pop_log_2022, y = fh$PR_2022_recoded, color= fh$PR_2022_recoded)) +
+  geom_point(size=0.5,alpha = 0.3) +
+  geom_text(data = fh, aes(x = Pop_log_2022, y = fh$PR_2022_recoded, label = country_name),
+            #color = c("orangered", "dodgerblue2", "green4")[as.numeric(fh$`2022Status`)],
+            check_overlap = TRUE, size = 3, hjust = 0.5, vjust = -0.5, alpha=2, show.legend = FALSE) +
+  geom_smooth(method = "lm", se = TRUE, alpha=0.25) +
+  labs(title = "Political Rights Score (FH) by Population Size (ln)",
+       x = "Population Size (ln) for 2022",
+       y = "Political Rights Score (PR) for 2022",
+       color = "PR Rights 2022"
+  )  +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Prediction Plots with CVs Benchmark -------------------------------------
+
+# Do it like above betareg() model CV for vdem and fh total score with predicted values
+
+# install.packages("ggplot2") # Uncomment and run if you haven't installed it
+library(ggplot2)
+# Also potentially useful packages
+install.packages("ggfortify") # For easy diagnostic plots
+install.packages("ggeffects") # For effect plots
+# install.packages("broom") # For tidying model output
+library(ggfortify)
+library(ggeffects)
+library(broom)
+
+# Generate standard diagnostic plots (Residuals vs Fitted, Q-Q, Scale-Location, Residuals vs Leverage)
+autoplot(modelI, which = 1:4, ncol = 2, label.id = NULL) + # Use which=1:6 for all 6 plots
+  theme_bw() # Optional: apply a cleaner theme
+
+# modelI5 <- lm(fh$PR_2022_recoded ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$communist, data = fh)
+
+# Define a sequence of values for the independent variable
+plot_modelI <- seq(min(fh$Pop_log_2022, na.rm = TRUE), max(fh$Pop_log_2022, na.rm = TRUE), length.out = 196)
+
+# Calculate modes (simplest way for 0/1: use table)
+island_mode <- as.numeric(names(which.max(table(fh$island_state))))
+communist_mode <- as.numeric(names(which.max(table(fh$communist))))
+
+control_values_modelI <- data.frame(
+  Pop_log_2022 = plot_modelI, 
+  GDPpc_log_2022 = mean(fh$GDPpc_log_2022, na.rm = TRUE), 
+  island_state = island_mode, # Fix at mode
+  diffusion_fh_2022 = mean(fh$diffusion_fh_2022, na.rm = TRUE), 
+  communist = communist_mode # Fix at mode
+)
+
+# Predict the dependent variable using the model
+control_values_modelI$predicted <- predict(modelI, newdata = control_values_modelI, type = "response")
+
+# Plot
+ggplot(control_values_modelI, aes(x = Pop_log_2022, y = predicted)) +
+  #geom_line(color = "blue", size = 1) +
+  geom_smooth(method = "lm", se = TRUE, color = "blue") +
+  #geom_smooth(method = "loess", se = TRUE, span=1, color = "blue") +
+  labs(
+    title = "Effect of Population (ln) on Political Rights Score (PR)",
+    x = "Population Size (ln) for 2022",
+    y = "Predicted Political Rights Score (PR) for 2022"
+  ) +
+  theme_minimal()  
+
+
+ggplot(control_values_modelI, aes(x = Pop_log_2022, y = predicted)) +
+  #geom_line(color = "blue", size = 1) +
+  #geom_smooth(method = "loess", se = TRUE, span=1, color = "blue") +
+  geom_smooth(method = "lm", se = TRUE, color = "blue") +
+  geom_point(data = fh, aes(x = Pop_log_2022, y = `2022PR`),size=0.5,alpha = 0.3,
+             color = c("orangered", "dodgerblue2", "green4")[as.numeric(fh$`2022Status`)],) +
+  geom_text(data = fh, aes(x = Pop_log_2022, y = `2022PR`, label = country_name),
+            fontface = "bold",
+            color = c("orangered", "dodgerblue2", "green4")[as.numeric(fh$`2022Status`)],
+            check_overlap = TRUE, size = 3, hjust = 0.5, vjust = -0.5, alpha=2, show.legend = FALSE) +
+  scale_color_manual(
+    values = c("F" = "green4", "PF" = "dodgerblue2", "NF" = "orangered"),
+    labels = c("F" = "Free", "PF" = "Partly Free", "NF" = "Not Free")
+  ) +
+  labs(
+    title = "Effect of Population (Log) on FH Total Score",
+    x = "Log of Population (2022)",
+    y = "Predicted Political Rights Score (PR) for 2022",
+    color = "FH Status 2022") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+#ggsave(file = here("Output", "Predicted FH Total Score by Pop 2022.png"), width = 8, height = 6)
+  
+  
+ggplot(control_values_modelI, aes(x = Pop_log_2022, y = predicted)) +
+  #geom_line(color = "blue", size = 1) +
+  #geom_smooth(method = "loess", se = TRUE, span=1, color = "blue") +
+  geom_smooth(method = "lm", se = TRUE, color = "blue") +
+  geom_point(data = subset(fh, `2022PR` >= 19 & `2022PR` <= 27), aes(x = Pop_log_2022, y = `2022PR`),size=0.5,alpha = 0.3
+  ) +
+  geom_text(data = subset(fh, `2022PR` >= 19 & `2022PR` <= 27), aes(x = Pop_log_2022, y = `2022PR`, label = country_name),
+            fontface = "bold",
+            check_overlap = TRUE, size = 3, hjust = 0.5, vjust = -0.5, alpha=2, show.legend = FALSE) +
+  labs(
+    title = "Effect of Population (Log) on FH Total Score",
+    x = "Log of Population (2022)",
+    y = "Predicted Political Rights Score (PR) for 2022",
+    color = "FH Status 2022") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+#ggsave(file = here("Output", "Predicted FH Total Score by Pop 2022.png"), width = 8, height = 6)
+
+#plot(modelI, which = 1) # Residuals vs Fitted
+
+
+# 7.  Civ Rights (DV) - Pop_log_2022 (IV) - OLS - CVs Benchmark------------
+
+# modelK4 <- lm(fh$`2022CL` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$communist, data = fh)
+range(fh$`2022CL`)
+
+# Plotting Civil Liberties (DV) - Pop_log_2022 (IV) - Simple - No CVs
+ggplot(fh, aes(x = fh$Pop_log_2022, y = fh$`2022CL`)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE, alpha=0.25) +
+  labs(title = "Civil Liberties Score (FH) by Population Size (ln)",
+       x = "Population Size (ln) for 2022",
+       y = "Civil Liberties Score (CL) for 2022")  +
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+# Plotting Civil Liberties (DV) - Pop_log_2022 (IV) - Simple - No CVs
+ggplot(fh, aes(x = fh$Pop_log_2022, y = fh$`2022CL`)) +
+  geom_point(size=0.5,alpha = 0.3) +
+  geom_text(data = fh, aes(x = Pop_log_2022, y = fh$`2022CL`, label = country_name),
+            color = c("orangered", "dodgerblue2", "green4")[as.numeric(fh$`2022Status`)],
+            check_overlap = TRUE, size = 3, hjust = 0.5, vjust = -0.5, alpha=2, show.legend = FALSE) +
+  geom_smooth(method = "lm", se = TRUE, alpha=0.25) +
+  scale_color_manual(
+    values = c("F" = "green4", "PF" = "dodgerblue2", "NF" = "orangered"),
+    labels = c("F" = "Free", "PF" = "Partly Free", "NF" = "Not Free")
+  ) +
+  labs(title = "Civil Liberties Score (FH) by Population Size (ln)",
+       x = "Population Size (ln) for 2022",
+       y = "Civil Liberties Score (CL) for 2022",
+       color = "FH Status 2022")  +
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+# Plotting Civil Liberties (DV) - Pop_log_2022 (IV) - Simple - No CVs
+ggplot(fh, aes(x = fh$Pop_log_2022, y = fh$`2022CL`, color= fh$`2022CL`)) +
+  geom_point(size=0.5,alpha = 0.3) +
+  geom_text(data = fh, aes(x = Pop_log_2022, y = fh$`2022CL`, label = country_name),
+            #color = c("orangered", "dodgerblue2", "green4")[as.numeric(fh$`2022Status`)],
+            check_overlap = TRUE, size = 3, hjust = 0.5, vjust = -0.5, alpha=2, show.legend = FALSE) +
+  geom_smooth(method = "lm", se = TRUE, alpha=0.25) +
+  labs(title = "Civil Liberties Score (FH) by Population Size (ln)",
+       x = "Population Size (ln) for 2022",
+       y = "Civil Liberties Score (CL) for 2022",
+       color = "PR Rights 2022"
+  )  +
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+# Prediction Plots with CVs Benchmark----------------------------
+
+# Generate standard diagnostic plots (Residuals vs Fitted, Q-Q, Scale-Location, Residuals vs Leverage)
+autoplot(modelK, which = 1:4, ncol = 2, label.id = NULL) + # Use which=1:6 for all 6 plots
+  theme_bw() # Optional: apply a cleaner theme
+
+# modelK4 <- lm(fh$`2022CL` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$communist, data = fh)
+
+# Define a sequence of values for the independent variable
+plot_modelK <- seq(min(fh$Pop_log_2022, na.rm = TRUE), max(fh$Pop_log_2022, na.rm = TRUE), length.out = 196)
+
+# Calculate modes (simplest way for 0/1: use table)
+island_mode <- as.numeric(names(which.max(table(fh$island_state))))
+communist_mode <- as.numeric(names(which.max(table(fh$communist))))
+
+control_values_modelK <- data.frame(
+  Pop_log_2022 = plot_modelK, 
+  GDPpc_log_2022 = mean(fh$GDPpc_log_2022, na.rm = TRUE), 
+  island_state = island_mode, # Fix at mode
+  diffusion_2022 = mean(fh$diffusion_fh_2022, na.rm = TRUE), 
+  communist = communist_mode # Fix at mode
+)
+
+# Predict the dependent variable using the model
+control_values_modelK$predicted <- predict(modelK, newdata = control_values_modelK, type = "response")
+
+# Plot
+ggplot(control_values_modelK, aes(x = Pop_log_2022, y = predicted)) +
+  #geom_line(color = "blue", size = 1) +
+  geom_smooth(method = "lm", se = TRUE, color = "blue") +
+  #geom_smooth(method = "loess", se = TRUE, span=1, color = "blue") +
+  labs(
+    title = "Civil Liberties Score (FH) by Population Size (ln)",
+    x = "Population Size (ln) for 2022",
+    y = "Predicted Civil Liberties Score (CL) for 2022"
+  ) +
+  theme_minimal()  
+
+
+ggplot(control_values_modelK, aes(x = Pop_log_2022, y = predicted)) +
+  #geom_line(color = "blue", size = 1) +
+  #geom_smooth(method = "loess", se = TRUE, span=1, color = "blue") +
+  geom_smooth(method = "lm", se = TRUE, color = "blue") +
+  geom_point(data = fh, aes(x = Pop_log_2022, y = fh$`2022CL`),size=0.5,alpha = 0.3,
+             color = c("orangered", "dodgerblue2", "green4")[as.numeric(fh$`2022Status`)],) +
+  geom_text(data = fh, aes(x = Pop_log_2022, y = fh$`2022CL`, label = country_name),
+            fontface = "bold",
+            color = c("orangered", "dodgerblue2", "green4")[as.numeric(fh$`2022Status`)],
+            check_overlap = TRUE, size = 3, hjust = 0.5, vjust = -0.5, alpha=2, show.legend = FALSE) +
+  scale_color_manual(
+    values = c("F" = "green4", "PF" = "dodgerblue2", "NF" = "orangered"),
+    labels = c("F" = "Free", "PF" = "Partly Free", "NF" = "Not Free")
+  ) +
+  labs(
+    title = "Civil Liberties Score (FH) by Population Size (ln)",
+    x = "Log of Population (2022)",
+    y = "Predicted Civil Liberties Score (CL) for 2022",
+    color = "FH Status 2022") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+ggplot(control_values_modelK, aes(x = Pop_log_2022, y = predicted)) +
+  #geom_line(color = "blue", size = 1) +
+  #geom_smooth(method = "loess", se = TRUE, span=1, color = "blue") +
+  geom_smooth(method = "lm", se = TRUE, color = "blue") +
+  geom_point(data = subset(fh, `2022CL` >= 30 & `2022CL` <= 40), aes(x = Pop_log_2022, y = `2022CL`),size=0.5,alpha = 0.3
+  ) +
+  geom_text(data = subset(fh, `2022CL` >= 30 & `2022CL` <= 40), aes(x = Pop_log_2022, y = `2022CL`, label = country_name),
+            fontface = "bold",
+            check_overlap = TRUE, size = 3, hjust = 0.5, vjust = -0.5, alpha=2, show.legend = FALSE) +
+  labs(
+    title = "Civil Liberties Score (FH) by Population Size (ln)",
+    x = "Log of Population (2022)",
+    y = "Predicted Civil Liberties Score (CL) for 2022",
+    color = "FH Status 2022") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+
+# 8. DAG ------------------------------------------------------------------
+
+install.packages("dagitty")
+#install.packages("ggdag")
+library(dagitty)
+library(ggdag)
+
+# Simple DAG
+dag_text <- "dag {
+Pop [exposure,pos=\"-0.5,0\"]
+DemScore [outcome,pos=\"0.5,0\"]
+Island [pos=\"-1,-1\"]
+GDPpc [pos=\"-1,1\"]
+Diffu [pos=\"1,1\"]
+Commu [pos=\"1,-1\"]
+Pop -> DemScore
+Island -> DemScore
+GDPpc -> DemScore
+Diffu -> DemScore
+Commu -> DemScore}"
+g <- dagitty(dag_text)
+ggdag(g, layout = "auto") + theme_dag_grey() + theme(legend.position = "right") +
+  ggtitle("DAG of effect of Population Size on Democracy Score with Covariates")
+
+
+# Labeled DAG
+dag_full_text <- 
+"dag {
+  Population [exposure,pos=\"-0.5,0\"]
+  Democracy_Score [outcome,pos=\"0.5,0\"]
+  Island_State [pos=\"-1,-1\"]
+  GDPpc [pos=\"-1,1\"]
+  Diffusion_Variable [pos=\"1,1\"]
+  Communist_Regime [pos=\"1,-1\"]
+  Population -> Democracy_Score
+  Island_State -> Democracy_Score
+  GDPpc -> Democracy_Score
+  Diffusion_Variable -> Democracy_Score
+  Communist_Regime -> Democracy_Score
+}"
+g_full <- dagitty(dag_full_text)
+
+# Plotting with extra labels
+ggdag(g_full, layout = "auto") +
+  geom_dag_point(size = 16, color="black") + # REDUCED NODE SIZE SIGNIFICANTLY
+  geom_dag_edges() +                       # Removed check_overlap, not needed here
+  geom_dag_label(aes(label = name),
+                   size = 5, label.padding = unit(0.5, "lines"),
+                   label.r = unit(0.15, "lines"), alpha = 0.7, hjust = 0.85, vjust = -0.65, check_overlap = TRUE,
+                   fill = "lightblue", color = "black" ) +# Adjusted text size for smaller node
+  theme_dag_blank() +                      # Use a theme without axes/gridlines
+  ggtitle("DAG of effect of Population Size on Democracy Score with Covariates") +
+  theme(plot.title = element_text(hjust = 0.5)) # Center title
+
+
+# Plotting with blacked out nodes
+ggdag(g_full, layout = "auto") +
+  geom_dag_point(size = 16, color="black") + # REDUCED NODE SIZE SIGNIFICANTLY
+  geom_dag_edges() +                       # Removed check_overlap, not needed here
+  geom_dag_text(aes(label = name),
+                  color = "black",           # Text color
+                  size = 4,
+                  vjust = -3.5
+                  ) + 
+  theme_dag_blank() +                      # Use a theme without axes/gridlines
+  ggtitle("DAG of effect of Population Size on Democracy Score with Covariates") +
+  theme(plot.title = element_text(hjust = 0.5)) # Center title 
+
+
 ## ** To Do:** ##
-# 1. Pol Rights (DV) - Pop_log_2022 (IV) - OLS - CVs Benchmark
-# 2. Civ Rights (DV) - Pop_log_2022 (IV) - OLS - CVs Benchmark
 # 3. Übersichts Tabellen herstellen
-# 4. (Maybe DAG)
 # 5. (Maybe Adding Shapes & Sizes for CVs)
+
+  
