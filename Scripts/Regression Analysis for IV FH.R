@@ -458,17 +458,17 @@ library(stargazer)
 # Save the table as a text file
 stargazer(model3_scaled, modelC, modelF, modelI, modelJ, modelK, modelL,
           type = "text", # Output format is text
-          out = here("Output", "All_Benchmark_Stargazer.txt"), # Specify the output file name
+          out = here("Output", "Tables", "All_Benchmark_Stargazer.txt"), # Specify the output file name
           title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - All Benchmark")
 
 # Extended 
 stargazer(model5_scaled, modelD, modelG, type = "text",
-          out = here("Output", "All_Extended_Stargazer.txt"), # Specify the output file name
+          out = here("Output", "Tables", "All_Extended_Stargazer.txt"), # Specify the output file name
           title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - CV Extended")
 
 # Maximal
 stargazer(model6_scaled, modelE, modelH, type = "text",
-          out = here("Output", "All_Maximal_Stargazer.txt"), # Specify the output file name
+          out = here("Output", "Tables", "All_Maximal_Stargazer.txt"), # Specify the output file name
           title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - CV Maximal")
 
 
@@ -476,19 +476,19 @@ stargazer(model6_scaled, modelE, modelH, type = "text",
 # Vdem all model specifications
 stargazer(model3_scaled, model5_scaled, model6_scaled,
           type = "text", # Output format is text
-          out = here("Output", "Vdem_All_Spec_Stargazer.txt"), # Specify the output file name
+          out = here("Output", "Tables", "Vdem_All_Spec_Stargazer.txt"), # Specify the output file name
           title = "Pop_log_2022 (IV) - Vdem (DV) - All Model Specifications")
 
 # FH Total score all model specifications
 stargazer(modelC, modelD, modelE,
           type = "text", # Output format is text
-          out = here("Output", "FH_Total_All_Spec_Stargazer.txt"), # Specify the output file name
+          out = here("Output", "Tables", "FH_Total_All_Spec_Stargazer.txt"), # Specify the output file name
           title = "Pop_log_2022 (IV) - FH Total Score (DV) - All Model Specifications")
 
 # FH Status all model specifications
 stargazer(modelF, modelG, modelH,
           type = "text", # Output format is text
-          out = here("Output", "FH_Status_All_Spec_Stargazer.txt"), # Specify the output file name
+          out = here("Output", "Tables", "FH_Status_All_Spec_Stargazer.txt"), # Specify the output file name
           title = "Pop_log_2022 (IV) - FH Status (DV) - All Model Specifications")
 
 
@@ -499,7 +499,7 @@ stargazer(model4, modelM, type = "text",
                                "Population (Small)", "Population (Large)", "Population (Huge)",
                                "GDPpc log 2022", "Island State", "Diffusion",  "Communist",
                                "Pop (Micro)/Intercept"),
-          out = here("Output", "Pop_cat_IV_Stargazer.txt"), # Specify the output file name
+          out = here("Output", "Tables", "Pop_cat_IV_Stargazer.txt"), # Specify the output file name
           title = "Pop_cat (IV) - DV: 2022 V_dem betareg() & FH Total Score (OLS) - CVs Benchmark")
 
 
@@ -508,19 +508,19 @@ library(modelsummary)
 modelsummary(
  list("Model 1" = model3_scaled, "Model 2" = modelC, "Model 3" = modelF, 
     "Model 4" = modelI, "Model 5" = modelJ, "Model 6" = modelK, "Model 7" = modelL),
-#output = here("Output", "All_Benchmark_Tinytable.txt"),
+#output = here("Output", "Tables", "All_Benchmark_Tinytable.txt"),
 title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - All Benchmark",
 stars = TRUE)
 
 modelsummary(
   list("2022V_Dem_scaled" = model3_scaled, "total_fh_2022" = modelC, "2022Status" = modelF, 
        "PR_2022_recoded" = modelI, "2022PR rating" = modelJ, "2022CL" = modelK, "2022CL rating" = modelL),
-  #output = here("Output", "All_Benchmark_Tinytable.txt"),
+  #output = here("Output", "Tables", "All_Benchmark_Tinytable.txt"),
   title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - All Benchmark",
   stars = TRUE)
 
 modelsummary(
   list("2022V_Dem" = model4, "total_fh_2022" = modelM),
-  #output = here("Output", "Cat_Benchmark_Tinytable.txt"),
+  #output = here("Output", "Tables", "Cat_Benchmark_Tinytable.txt"),
   title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - All Benchmark",
   stars = TRUE)
