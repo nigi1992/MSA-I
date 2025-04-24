@@ -881,7 +881,100 @@ ggdag(g_full, layout = "auto") +
 
 
 ## ** To Do:** ##
-# 3. Übersichts Tabellen herstellen
 # 5. (Maybe Adding Shapes & Sizes for CVs)
 
+
+# 9. Illustration Generation (Experimental) ----------------------------------------------
+
+# Install necessary packages if you haven't already
+# install.packages("ggplot2")
+# install.packages("ggforce")
+# install.packages("patchwork")
+
+# Load the libraries
+library(ggplot2)
+library(ggforce) # For geom_circle
+library(patchwork) # For combining plots
+
+# --- Define data for the circles ---
+# We estimate positions and sizes based on the image.
+# x0, y0 are center coordinates, r is the radius.
+circle_past <- data.frame(x0 = 5, y0 = 5, r = 2.5)
+circle_future <- data.frame(x0 = 6, y0 = 3.5, r = 1.5) # Smaller, lower, slightly right
+
+# --- Create the "Past" Plot ---
+p_past <- ggplot() +
+  # Set plot limits and maintain aspect ratio (makes circles look like circles)
+  coord_fixed(ratio = 1, xlim = c(0, 10), ylim = c(0, 10), expand = FALSE) +
   
+  # Add the circle for the "Past"
+  geom_circle(data = circle_past, aes(x0 = x0, y0 = y0, r = r),
+              fill = NA, color = "black", linewidth = 0.8) +
+  
+  # Add the diagonal dashed line (approx. y = x)
+  # Using geom_segment for more control over start/end points
+  geom_segment(aes(x = 1, y = 1, xend = 9, yend = 9),
+               linetype = "dotted", color = "black", linewidth = 0.6) +
+  
+  # Add labels and title
+  labs(title = "Past",
+       x = "Heterogeneity Costs",
+       y = "Scale Advantages") +
+  
+  # Apply a minimal theme and customize
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"), # Center title
+    axis.text = element_blank(),        # Remove axis number labels
+    axis.ticks = element_blank(),       # Remove axis ticks
+    panel.grid = element_blank(),       # Remove grid lines
+    axis.title = element_text(size = 10) # Adjust axis title size
+  )
+
+# --- Create the "Future" Plot ---
+p_future <- ggplot() +
+  # Set plot limits and maintain aspect ratio
+  coord_fixed(ratio = 1, xlim = c(0, 10), ylim = c(0, 10), expand = FALSE) +
+  
+  # Add the circle for the "Future"
+  geom_circle(data = circle_future, aes(x0 = x0, y0 = y0, r = r),
+              fill = NA, color = "black", linewidth = 0.8) +
+  
+  # Add the diagonal solid line (less steep than the past one, based on image)
+  # Adjust y-coordinates to make it less steep (e.g., starts lower, ends lower for same x range)
+  geom_segment(aes(x = 1, y = 2, xend = 9, yend = 7),
+               linetype = "solid", color = "black", linewidth = 0.6) +
+  
+  # Add labels and title (remove y-axis label for combined plot)
+  labs(title = "Future",
+       x = "Heterogeneity Costs",
+       y = NULL) + # Set y label to NULL
+  
+  # Apply minimal theme and customize
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.text = element_blank(),
+    axis.ticks = element_blank(),
+    panel.grid = element_blank(),
+    axis.title.y = element_blank(), # Completely remove y-axis title space
+    axis.title.x = element_text(size = 10)
+  )
+
+# --- Combine the plots side-by-side ---
+combined_plot <- p_past + p_future
+
+# --- Add overall title and caption using patchwork ---
+final_plot <- combined_plot +
+  plot_annotation(
+    title = "Changing Dynamics of State Formation",
+    caption = "Source: Based on Lambais and Breiding 2019; Alesina and Spolaore 2005.\nNote: Axes represent qualitative 'Low' to 'High' ranges.",
+    theme = theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+                  plot.caption = element_text(hjust = 0, size = 8)) # Left-align caption
+  )
+
+# --- Display the final plot ---
+print(final_plot)
+
+# --- Optional: Save the plot ---
+# ggsave("state_formation_graph.png", plot = final_plot, width = 8, height = 4.5, dpi = 300)  
