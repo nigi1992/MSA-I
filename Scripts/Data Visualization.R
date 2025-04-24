@@ -884,7 +884,187 @@ ggdag(g_full, layout = "auto") +
 # 5. (Maybe Adding Shapes & Sizes for CVs)
 
 
-# 9. Illustration Generation (Experimental) ----------------------------------------------
+
+# 9. Descriptive Statistics -----------------------------------------------
+
+# Descriptive statistics for the dataset
+# Load necessary libraries
+library(ggplot2)
+
+### V-Dem
+
+# Distribution of Population
+ggplot(vdem, aes(x = Pop_log_2022)) +
+  geom_histogram(binwidth = 1, fill = "pink", color = "black", alpha = 0.7) +
+  labs(title = "Distribution of Population (Log - V-Dem)",
+       x = "Log of Population (2022)",
+       y = "Frequency") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+ggsave(file = here("Output", "Plots", "Distribution", "Distribution of V-Dem Population.png"), width = 8, height = 6)
+
+
+# Dist of Population Category
+ggplot(vdem, aes(x = Pop_cat_2022)) +
+  geom_bar(fill = "pink", color = "black", alpha = 0.7) +
+  labs(title = "Distribution of Population Categories (V-Dem)",
+       x = "Population Category (2022)",
+       y = "Count") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+ggsave(file = here("Output", "Plots", "Distribution", "Distribution of V-Dem Population Categories.png"), width = 8, height = 6)
+
+table(vdem$Pop_cat_2022)
+
+
+# Dist of V-Dem Democracy Score
+ggplot(vdem, aes(x = `2022V_Dem`)) +
+  geom_histogram(binwidth = 0.05, fill = "violet", color = "black", alpha = 0.7) +
+  labs(title = "Distribution of V-Dem Democracy Score (2022)",
+       x = "V-Dem Democracy Score (2022)",
+       y = "Frequency") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+ggsave(file = here("Output", "Plots", "Distribution", "Distribution of V-Dem Score.png"), width = 8, height = 6)
+
+
+summary(vdem$`2022V_Dem`)
+
+# Dist of V-Dem Democracy Score
+ggplot(vdem, aes(x = `2022V_Dem_scaled`)) +
+  geom_histogram(binwidth = 5, fill = "violet", color = "black", alpha = 0.7) +
+  labs(title = "Distribution of V-Dem Democracy Score (2022)",
+       x = "V-Dem Democracy Score (2022)",
+       y = "Frequency") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+summary(vdem$`2022V_Dem_scaled`)
+
+## Dist of Benchmark CV for V-Dem
+
+# Dist of GDP per Capita
+ggplot(vdem, aes(x = GDPpc2022)) +
+  geom_histogram(binwidth = 5000, fill = "green3", color = "black", alpha = 0.7) +
+  labs(title = "Distribution of GDP per Capita (2022 - V-Dem)",
+       x = "GDP per Capita (2022)",
+       y = "Frequency") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Dist of Island
+ggplot(vdem, aes(x = island_state)) +
+  geom_bar(fill = "brown", color = "black", alpha = 0.7) +
+  labs(title = "Distribution of Island States (V-Dem)",
+       x = "Island State",
+       y = "Count") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Dist of Communism
+ggplot(vdem, aes(x = communist)) +
+  geom_bar(fill = "red2", color = "black", alpha = 0.7) +
+  labs(title = "Distribution of former & current communist states (V-Dem)",
+       x = "Communism",
+       y = "Count") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+### FH
+# Distribution of Population
+ggplot(fh, aes(x = Pop_log_2022)) +
+  geom_histogram(binwidth = 1, fill = "green1", color = "black", alpha = 0.7) +
+  labs(title = "Distribution of Population (Log - FH)",
+       x = "Log of Population (2022)",
+       y = "Frequency") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+ggsave(file = here("Output", "Plots", "Distribution", "Distribution of FH Population.png"), width = 8, height = 6)
+
+# Dist of Population Category
+ggplot(fh, aes(x = Pop_cat_2022)) +
+  geom_bar(fill = "green1", color = "black", alpha = 0.7) +
+  labs(title = "Distribution of Population Categories (FH)",
+       x = "Population Category (2022)",
+       y = "Count") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+ggsave(file = here("Output", "Plots", "Distribution", "Distribution of FH Population Categories.png"), width = 8, height = 6)
+
+table(fh$Pop_cat_2022)
+
+
+## Dist of Democracy Scores
+# Dist of FH Total Score
+ggplot(fh, aes(x = `total_fh_2022`)) +
+  geom_histogram(binwidth = 5, fill = "yellow1", color = "black", alpha = 0.5) +
+  labs(title = "Distribution of Freedom House Total Score (2022)",
+       x = "Freedom House Total Score (2022)",
+       y = "Frequency") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+ggsave(file = here("Output", "Plots", "Distribution", "Distribution of FH Total Score.png"), width = 8, height = 6)
+
+summary(fh$total_fh_2022)
+
+# Dist of FH Status
+ggplot(fh, aes(x = `2022Status`)) +
+  geom_bar(fill = "yellow1", color = "black", alpha = 0.7) +
+  labs(title = "Distribution of Freedom House Status (2022)",
+       x = "Freedom House Status (2022)",
+       y = "Count") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+ggsave(file = here("Output", "Plots", "Distribution", "Distribution of FH Status.png"), width = 8, height = 6)
+table(fh$`2022Status`)
+
+# Dist of FH Political Rights
+ggplot(fh, aes(x = `PR_2022_recoded`)) +
+  geom_histogram(binwidth = 2.5, fill = "green4", color = "black", alpha = 0.7) +
+  labs(title = "Distribution of Freedom House Political Rights Score (2022)",
+       x = "Freedom House Political Rights Score (2022)",
+       y = "Frequency") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+ggsave(file = here("Output", "Plots", "Distribution", "Distribution of FH Political Rights Score.png"), width = 8, height = 6)
+summary(fh$`PR_2022_recoded`)
+
+# Dist of FH PR rating
+ggplot(fh, aes(x = `2022PR rating`)) +
+  geom_bar(fill = "green4", color = "black", alpha = 0.7) +
+  labs(title = "Distribution of Freedom House Political Rights Rating (2022)",
+       x = "Freedom House Political Rights Rating (2022)",
+       y = "Count") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+ggsave(file = here("Output", "Plots", "Distribution", "Distribution of FH Political Rights Rating.png"), width = 8, height = 6)
+table(fh$`2022PR rating`)
+
+# Dist of FH Civil Liberties
+ggplot(fh, aes(x = `2022CL`)) +
+  geom_histogram(binwidth = 3.75, fill = "lightblue1", color = "black", alpha = 0.7) +
+  labs(title = "Distribution of Freedom House Civil Liberties Score (2022)",
+       x = "Freedom House Civil Liberties Score (2022)",
+       y = "Frequency") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+ggsave(file = here("Output", "Plots", "Distribution", "Distribution of FH Civil Liberties Score.png"), width = 8, height = 6)
+summary(fh$`2022CL`)
+
+# Dist of FH CL rating
+ggplot(fh, aes(x = `2022CL rating`)) +
+  geom_bar(fill = "lightblue1", color = "black", alpha = 0.7) +
+  labs(title = "Distribution of Freedom House Civil Liberties Rating (2022)",
+       x = "Freedom House Civil Liberties Rating (2022)",
+       y = "Count") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+ggsave(file = here("Output", "Plots", "Distribution", "Distribution of FH Civil Liberties Rating.png"), width = 8, height = 6)
+table(fh$`2022CL rating`)
+
+
+# . Illustration Generation (Experimental) ----------------------------------------------
 
 # Install necessary packages if you haven't already
 # install.packages("ggplot2")
