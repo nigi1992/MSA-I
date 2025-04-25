@@ -1126,9 +1126,17 @@ table(fh$`2022CL rating`)
 
 # 10. Descriptive Statistics - Tables -------------------------------------
 
-# V-Dem
+## Population
+# Dist of Population
+summary(vdem$Pop_log_2022)
+summary(fh$Pop_log_2022)
+
+# Dist of Population Category
+table(fh$Pop_cat_2022)
 table(vdem$Pop_cat_2022)
 
+## Democracy Scores
+# V-Dem
 # Dist of V-Dem Democracy Score
 summary(vdem$`2022V_Dem`)
 
@@ -1136,9 +1144,6 @@ summary(vdem$`2022V_Dem`)
 summary(vdem$`2022V_Dem_scaled`)
 
 # FH
-# Dist of Population Category
-table(fh$Pop_cat_2022)
-
 # Dist of FH Total Score
 summary(fh$total_fh_2022)
 
