@@ -69,7 +69,7 @@ ggplot(vdem, aes(x = Pop_log_2022, y = `2022V_Dem`, color=`2022V_Dem`)) +
        y = "V-Dem LDI Score for 2022",
        color = "V-Dem Score 2022") +
   theme(plot.title = element_text(hjust = 0.5))+
-  theme_minimal()
+  theme_bw()
 
 
 # Simple Regressions: Pop 2022 (IV) - V-Dem (DV), No CV (scaled) ----------
@@ -81,7 +81,9 @@ ggplot(vdem, aes(x = Pop_log_2022, y = `2022V_Dem_scaled`)) +
   labs(title = "Democracy Score (V-Dem) by Population Size (ln)",
        x = "Population Size (ln) for 2022",
        y = "V-Dem LDI Score for 2022") +
+  #theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
+#ggsave(file = here("Output", "Plots", "Relationship", "Democracy Score (V-Dem) by Population Size (ln).png"), width = 8, height = 6)
 
 # Plotting Model 1: Pop_log_2022 with color and country labels
 ggplot(vdem, aes(x = Pop_log_2022, y = `2022V_Dem_scaled`, color=`2022V_Dem`)) +
@@ -94,7 +96,8 @@ ggplot(vdem, aes(x = Pop_log_2022, y = `2022V_Dem_scaled`, color=`2022V_Dem`)) +
        y = "V-Dem LDI Score for 2022",
        color = "V-Dem Score 2022") +
   theme(plot.title = element_text(hjust = 0.5))+
-  theme_minimal()
+  theme_bw()
+ggsave(file = here("Output", "Plots", "Relationship", "Democracy Score (V-Dem) by Population Size (ln) - Complex.png"), width = 8, height = 6)
 
 
 # Pop_cat_2022 ------------------------------------------------------------
@@ -127,13 +130,15 @@ ggplot(vdem, aes(x = Pop_cat_2022, y = `2022V_Dem`, color=Pop_cat_2022)) +
        x = "2022 Population Categories",
        y = "V-Dem LDI Score for 2022",
        color = "Population Categories") +
-  theme_grey() +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
+ggsave(file = here("Output", "Plots", "Relationship", "Democracy Score (V-Dem) by Population Category (Ordered Logit).png"), width = 8, height = 6)
+
 
 # Plotting Model 2 (scaled V-dem score): Pop_cat_2022 with color and country labels
 ggplot(vdem, aes(x = Pop_cat_2022, y = `2022V_Dem_scaled`, color=Pop_cat_2022)) +
   geom_boxplot(alpha=0.7)+
-  geom_jitter(width = 0.2, alpha = 0.5) +
+  geom_jitter(width = 0.2, alpha = 0.75) +
   geom_text(data = 
               #subset(vdem, `2022V_Dem` > 0.65 | `2022V_Dem` < 0.175), 
               vdem, aes(x = Pop_cat_2022, y = `2022V_Dem_scaled`, label = country_name),
@@ -150,8 +155,10 @@ ggplot(vdem, aes(x = Pop_cat_2022, y = `2022V_Dem_scaled`, color=Pop_cat_2022)) 
        x = "2022 Population Categories",
        y = "V-Dem LDI Score for 2022",
        color = "Population Categories") +
-  theme_grey() +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
+#ggsave(file = here("Output", "Plots", "Relationship", "Democracy Score (V-Dem) by Population Category (Ordered Logit).png"), width = 8, height = 6)
+
 
 # Plotting Model 1 Pop_cat_2022 with and without intercept for illustration purposes------------------------
 
@@ -204,7 +211,7 @@ ggplot(control_values_model3, aes(x = Pop_log_2022, y = predicted)) +
     x = "Log of Population (2022)",
     y = "Predicted V-Dem 2022 Score"
   ) +
-  theme_minimal()  
+  theme_bw()  
 # The curve first ascends and then descends, indicating a non-linear relationship between population size and democracy score.
 # I suppose this is due to the missing micro states in the v-dem data set and the fact that many of the "best" democracies are 'small' or 'large'
 # and have a log_pop of 15-16, whereas in the fh cure you can first see a sharp drop before it starts to ascend again, due to the 'best' democracies only 
@@ -222,7 +229,9 @@ ggplot(control_values_model3, aes(x = Pop_log_2022, y = predicted, color = predi
        x = "Log of Population (2022)",
        y = "Predicted V-Dem 2022 Score",
        color = "V-Dem Score 2022") +
-  theme_minimal() 
+  theme_bw()
+ggsave(file = here("Output", "Plots", "Relationship", "Effect of Population (Log) on V-Dem 2022 Score.png"), width = 8, height = 6)
+
 
 # Close with country labels
 ggplot(control_values_model3, aes(x = Pop_log_2022, y = predicted)) +
@@ -236,7 +245,7 @@ ggplot(control_values_model3, aes(x = Pop_log_2022, y = predicted)) +
     x = "Log of Population (2022)",
     y = "Predicted V-Dem 2022 Score",
     color = "V-Dem Score 2022") +
-  theme_minimal() 
+  theme_bw() 
 
 
 # betareg() Regression: Pop 2022 (IV) - V-Dem (DV), with CVs Benchmark (scaled) --------
@@ -270,7 +279,7 @@ ggplot(control_values_model3_scaled, aes(x = Pop_log_2022, y = predicted)) +
     x = "Log of Population (2022)",
     y = "Predicted V-Dem 2022 Score"
   ) +
-  theme_minimal()  
+  theme_bw()  
 
 # From afar with country labels
 ggplot(control_values_model3_scaled, aes(x = Pop_log_2022, y = predicted)) +
@@ -284,7 +293,7 @@ ggplot(control_values_model3_scaled, aes(x = Pop_log_2022, y = predicted)) +
        x = "Log of Population (2022)",
        y = "Predicted V-Dem 2022 Score",
        color = "V-Dem Score 2022") +
-  theme_minimal() 
+  theme_bw() 
 
 # Close with country labels
 ggplot(control_values_model3_scaled, aes(x = Pop_log_2022, y = predicted)) +
@@ -300,7 +309,7 @@ ggplot(control_values_model3_scaled, aes(x = Pop_log_2022, y = predicted)) +
        x = "Log of Population (2022)",
        y = "Predicted V-Dem 2022 Score",
        color = "V-Dem Score 2022") +
-  theme_minimal() 
+  theme_bw() 
 
 
 # 3. Simple Regressions: Pop 2022 (IV) - 2022 FH Total Score (DV), No CV --------------
@@ -324,6 +333,8 @@ ggplot(fh, aes(x = fh$Pop_log_2022, y = fh$total_fh_2022)) +
        x = "Population Size (ln) for 2022",
        y = "Total Freedom House Score for 2022")  +
   theme(plot.title = element_text(hjust = 0.5))
+ggsave(file = here("Output", "Plots", "Relationship", "Democracy Score (FH) by Population Size (ln).png"), width = 8, height = 6)
+
 
 # Plotting Model A: Pop_log_2022 with country names and color by 2022Status
 ggplot(fh, aes(x = fh$Pop_log_2022, y = fh$total_fh_2022, color = `2022Status`)) +
@@ -340,7 +351,9 @@ ggplot(fh, aes(x = fh$Pop_log_2022, y = fh$total_fh_2022, color = `2022Status`))
        x = "Population Size (ln) for 2022",
        y = "Total Freedom House Score for 2022",
        color = "FH Status 2022")  +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
+ggsave(file = here("Output", "Plots", "Relationship", "Democracy Score (FH) by Population Size (ln) - Status colored.png"), width = 8, height = 6)
 
 
 # Pop_cat_2022 ------------------------------------------------------------
@@ -367,8 +380,9 @@ ggplot(fh, aes(x = Pop_cat_2022, y = `total_fh_2022`, color = `Pop_cat_2022`)) +
        x = "2022 Population Categories",
        y = "Total Freedom House Score for 2022",
        color = "Population Categories") +
-  theme_grey() +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
+ggsave(file = here("Output", "Plots", "Relationship", "Democracy Score (FH) by Population Category (Ordered Logit).png"), width = 8, height = 6)
 
 
 # 4. Ordinal Logistic Regression polr(): DV (FH Status) & IV (Log Pop), No CVs --------
@@ -403,12 +417,12 @@ ggplot(plot_fh_DV_status_long, aes(x = Pop_log_2022, y = Probability, color = St
     values = c("NF" = "orangered", "PF" = "dodgerblue2", "F" = "green4"),
     labels = c("NF" = "Not Free", "PF" = "Partly Free", "F" = "Free")
   ) +
-  theme_minimal() +
+  theme_bw() +
   theme(
     legend.position = "right",
     plot.title = element_text(hjust = 0.5)
   )
-#ggsave(file = here("Output", "Predicted Prob Status 2022.png"), width = 8, height = 6)
+ggsave(file = here("Output", "Plots", "Relationship", "Predicted Prob Status 2022.png"), width = 8, height = 6)
 
 
 # 5. OLS Regression: Pop 2022 (IV) - FH Total Score (DV), with CVs Benchmark--------
@@ -443,7 +457,7 @@ ggplot(control_values_modelC, aes(x = Pop_log_2022, y = predicted)) +
     x = "Log of Population (2022)",
     y = "Predicted FH Total Score"
   ) +
-  theme_minimal()  
+  theme_bw()  
 
 
 ggplot(control_values_modelC, aes(x = Pop_log_2022, y = predicted)) +
@@ -465,8 +479,9 @@ ggplot(control_values_modelC, aes(x = Pop_log_2022, y = predicted)) +
     x = "Log of Population (2022)",
     y = "Predicted FH Total Score",
     color = "FH Status 2022") +
-  theme_minimal() +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
+ggsave(file = here("Output", "Plots", "Relationship", "Predicted FH Total Score by Pop 2022.png"), width = 8, height = 6)
 #ggsave(file = here("Output", "Predicted FH Total Score by Pop 2022.png"), width = 8, height = 6)
 
 
@@ -486,7 +501,7 @@ ggplot(control_values_modelC, aes(x = Pop_log_2022, y = predicted)) +
     x = "Log of Population (2022)",
     y = "Predicted FH Total Score",
     color = "FH Status 2022") +
-  theme_minimal() +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
 #ggsave(file = here("Output", "Predicted FH Total Score by Pop 2022.png"), width = 8, height = 6)
 
@@ -522,7 +537,31 @@ ggplot(fh, aes(x = fh$Pop_log_2022, y = fh$`2022PR`)) +
        x = "Population Size (ln) for 2022",
        y = "Political Rights Score (PR) for 2022",
        color = "FH Status 2022")  +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
+ggsave(file = here("Output", "Plots", "Relationship", "Political Rights Score (FH) by Population Size (ln) - Status colored.png"), width = 8, height = 6)
+
+
+ggplot(fh, aes(x = fh$Pop_log_2022, y = fh$`2022PR`)) +
+  geom_point(size=0.5,alpha = 0.3,
+             #color = c("purple3", "royalblue2", "dodgerblue1", "yellow1", "yellowgreen", "green4")[as.numeric(fh$`2022PR rating`)],
+             #check_overlap = TRUE, size = 0.5, hjust = 0.5, vjust = -0.5, alpha=0.2, show.legend = FALSE
+             ) +
+  geom_text(data = fh, aes(x = Pop_log_2022, y = fh$`2022PR`, label = country_name),
+            color = c("purple3", "royalblue2", "dodgerblue1", "yellow1", "yellowgreen", "green4")[as.numeric(fh$`2022PR rating`)],
+            check_overlap = TRUE, size = 3, hjust = 0.5, vjust = -0.5, alpha=2, show.legend = FALSE
+            ) +
+  geom_smooth(method = "lm", se = TRUE, alpha=0.25) +
+  #scale_color_manual(
+  #  values = c("F" = "green4", "PF" = "dodgerblue2", "NF" = "orangered"),
+  #  labels = c("F" = "Free", "PF" = "Partly Free", "NF" = "Not Free")
+  #) +
+  labs(title = "Political Rights Score (FH) by Population Size (ln)",
+       x = "Population Size (ln) for 2022",
+       y = "Political Rights Score (PR) for 2022",
+       color = "PR Rating 2022")  +
+  theme(plot.title = element_text(hjust = 0.5))
+#ggsave(file = here("Output", "Plots", "Relationship", "Political Rights Score (FH) by Population Size (ln) - Rating colored.png"), width = 8, height = 6)
 
 
 # Plotting Pol Rights (DV) - Pop_log_2022 (IV) - Simple - No CVs
@@ -634,7 +673,7 @@ ggplot(control_values_modelI, aes(x = Pop_log_2022, y = predicted)) +
     x = "Population Size (ln) for 2022",
     y = "Predicted Political Rights Score (PR) for 2022"
   ) +
-  theme_minimal()  
+  theme_bw()  
 
 
 ggplot(control_values_modelI, aes(x = Pop_log_2022, y = predicted)) +
@@ -656,7 +695,7 @@ ggplot(control_values_modelI, aes(x = Pop_log_2022, y = predicted)) +
     x = "Log of Population (2022)",
     y = "Predicted Political Rights Score (PR) for 2022",
     color = "FH Status 2022") +
-  theme_minimal() +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
 #ggsave(file = here("Output", "Predicted FH Total Score by Pop 2022.png"), width = 8, height = 6)
   
@@ -675,7 +714,7 @@ ggplot(control_values_modelI, aes(x = Pop_log_2022, y = predicted)) +
     x = "Log of Population (2022)",
     y = "Predicted Political Rights Score (PR) for 2022",
     color = "FH Status 2022") +
-  theme_minimal() +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
 #ggsave(file = here("Output", "Predicted FH Total Score by Pop 2022.png"), width = 8, height = 6)
 
@@ -712,7 +751,29 @@ ggplot(fh, aes(x = fh$Pop_log_2022, y = fh$`2022CL`)) +
        x = "Population Size (ln) for 2022",
        y = "Civil Liberties Score (CL) for 2022",
        color = "FH Status 2022")  +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
+ggsave(file = here("Output", "Plots", "Relationship", "Civil Liberties Score (FH) by Population Size (ln) - Status colored.png"), width = 8, height = 6)
+
+
+
+# Plotting Civil Liberties (DV) - Pop_log_2022 (IV) - Simple - No CVs
+ggplot(fh, aes(x = fh$Pop_log_2022, y = fh$`2022CL`)) +
+  geom_point(size=0.5,alpha = 0.3) +
+  geom_text(data = fh, aes(x = Pop_log_2022, y = fh$`2022CL`, label = country_name),
+            color = c("purple3", "royalblue2", "dodgerblue1", "yellow1", "yellowgreen", "green4")[as.factor(fh$`2022CL rating`)],
+            check_overlap = TRUE, size = 3, hjust = 0.5, vjust = -0.5, alpha=2, show.legend = FALSE) +
+  geom_smooth(method = "lm", se = TRUE, alpha=0.25) +
+  scale_color_manual(
+    #values = c("F" = "green4", "PF" = "dodgerblue2", "NF" = "orangered"),
+    #labels = c("F" = "Free", "PF" = "Partly Free", "NF" = "Not Free")
+  ) +
+  labs(title = "Civil Liberties Score (FH) by Population Size (ln)",
+       x = "Population Size (ln) for 2022",
+       y = "Civil Liberties Score (CL) for 2022",
+       color = "CL Rating 2022")  +
+  theme(plot.title = element_text(hjust = 0.5))
+#ggsave(file = here("Output", "Plots", "Relationship", "Civil Liberties Score (FH) by Population Size (ln) - Ratings colored.png"), width = 8, height = 6)
 
 
 # Plotting Civil Liberties (DV) - Pop_log_2022 (IV) - Simple - No CVs
@@ -766,7 +827,7 @@ ggplot(control_values_modelK, aes(x = Pop_log_2022, y = predicted)) +
     x = "Population Size (ln) for 2022",
     y = "Predicted Civil Liberties Score (CL) for 2022"
   ) +
-  theme_minimal()  
+  theme_bw()  
 
 
 ggplot(control_values_modelK, aes(x = Pop_log_2022, y = predicted)) +
@@ -788,7 +849,7 @@ ggplot(control_values_modelK, aes(x = Pop_log_2022, y = predicted)) +
     x = "Log of Population (2022)",
     y = "Predicted Civil Liberties Score (CL) for 2022",
     color = "FH Status 2022") +
-  theme_minimal() +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
 
 
@@ -806,7 +867,7 @@ ggplot(control_values_modelK, aes(x = Pop_log_2022, y = predicted)) +
     x = "Log of Population (2022)",
     y = "Predicted Civil Liberties Score (CL) for 2022",
     color = "FH Status 2022") +
-  theme_minimal() +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
 
 
@@ -834,6 +895,7 @@ Commu -> DemScore}"
 g <- dagitty(dag_text)
 ggdag(g, layout = "auto") + theme_dag_grey() + theme(legend.position = "right") +
   ggtitle("DAG of effect of Population Size on Democracy Score with Covariates")
+#ggsave(file = here("Output", "Plots", "simple dag.png"), width = 8, height = 6, dpi = 300)
 
 
 # Labeled DAG
@@ -859,11 +921,13 @@ ggdag(g_full, layout = "auto") +
   geom_dag_edges() +                       # Removed check_overlap, not needed here
   geom_dag_label(aes(label = name),
                    size = 5, label.padding = unit(0.5, "lines"),
-                   label.r = unit(0.15, "lines"), alpha = 0.7, hjust = 0.85, vjust = -0.65, check_overlap = TRUE,
+                   label.r = unit(0.15, "lines"), alpha = 0.7, hjust = 0.575, vjust = -0.35, check_overlap = TRUE,
                    fill = "lightblue", color = "black" ) +# Adjusted text size for smaller node
   theme_dag_blank() +                      # Use a theme without axes/gridlines
   ggtitle("DAG of effect of Population Size on Democracy Score with Covariates") +
+  #theme_dag() +
   theme(plot.title = element_text(hjust = 0.5)) # Center title
+ggsave(file = here("Output", "Plots", "dag blue label.png"), width = 12, height = 7, dpi = 300)
 
 
 # Plotting with blacked out nodes
@@ -878,14 +942,10 @@ ggdag(g_full, layout = "auto") +
   theme_dag_blank() +                      # Use a theme without axes/gridlines
   ggtitle("DAG of effect of Population Size on Democracy Score with Covariates") +
   theme(plot.title = element_text(hjust = 0.5)) # Center title 
+ggsave(file = here("Output", "Plots", "dag simple.png"), width = 10, height = 7, dpi = 300)
 
 
-## ** To Do:** ##
-# 5. (Maybe Adding Shapes & Sizes for CVs)
-
-
-
-# 9. Descriptive Statistics -----------------------------------------------
+# 9. Descriptive Statistics - Plots -----------------------------------------------
 
 # Descriptive statistics for the dataset
 # Load necessary libraries
@@ -899,7 +959,7 @@ ggplot(vdem, aes(x = Pop_log_2022)) +
   labs(title = "Distribution of Population (Log - V-Dem)",
        x = "Log of Population (2022)",
        y = "Frequency") +
-  theme_minimal() +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
 ggsave(file = here("Output", "Plots", "Distribution", "Distribution of V-Dem Population.png"), width = 8, height = 6)
 
@@ -910,7 +970,7 @@ ggplot(vdem, aes(x = Pop_cat_2022)) +
   labs(title = "Distribution of Population Categories (V-Dem)",
        x = "Population Category (2022)",
        y = "Count") +
-  theme_minimal() +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
 ggsave(file = here("Output", "Plots", "Distribution", "Distribution of V-Dem Population Categories.png"), width = 8, height = 6)
 
@@ -923,7 +983,7 @@ ggplot(vdem, aes(x = `2022V_Dem`)) +
   labs(title = "Distribution of V-Dem Democracy Score (2022)",
        x = "V-Dem Democracy Score (2022)",
        y = "Frequency") +
-  theme_minimal() +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
 ggsave(file = here("Output", "Plots", "Distribution", "Distribution of V-Dem Score.png"), width = 8, height = 6)
 
@@ -936,7 +996,7 @@ ggplot(vdem, aes(x = `2022V_Dem_scaled`)) +
   labs(title = "Distribution of V-Dem Democracy Score (2022)",
        x = "V-Dem Democracy Score (2022)",
        y = "Frequency") +
-  theme_minimal() +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
 
 summary(vdem$`2022V_Dem_scaled`)
@@ -949,7 +1009,7 @@ ggplot(vdem, aes(x = GDPpc2022)) +
   labs(title = "Distribution of GDP per Capita (2022 - V-Dem)",
        x = "GDP per Capita (2022)",
        y = "Frequency") +
-  theme_minimal() +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
 
 # Dist of Island
@@ -958,7 +1018,7 @@ ggplot(vdem, aes(x = island_state)) +
   labs(title = "Distribution of Island States (V-Dem)",
        x = "Island State",
        y = "Count") +
-  theme_minimal() +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
 
 # Dist of Communism
@@ -967,7 +1027,7 @@ ggplot(vdem, aes(x = communist)) +
   labs(title = "Distribution of former & current communist states (V-Dem)",
        x = "Communism",
        y = "Count") +
-  theme_minimal() +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
 
 
@@ -978,7 +1038,7 @@ ggplot(fh, aes(x = Pop_log_2022)) +
   labs(title = "Distribution of Population (Log - FH)",
        x = "Log of Population (2022)",
        y = "Frequency") +
-  theme_minimal() +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
 ggsave(file = here("Output", "Plots", "Distribution", "Distribution of FH Population.png"), width = 8, height = 6)
 
@@ -988,7 +1048,7 @@ ggplot(fh, aes(x = Pop_cat_2022)) +
   labs(title = "Distribution of Population Categories (FH)",
        x = "Population Category (2022)",
        y = "Count") +
-  theme_minimal() +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
 ggsave(file = here("Output", "Plots", "Distribution", "Distribution of FH Population Categories.png"), width = 8, height = 6)
 
@@ -1002,7 +1062,7 @@ ggplot(fh, aes(x = `total_fh_2022`)) +
   labs(title = "Distribution of Freedom House Total Score (2022)",
        x = "Freedom House Total Score (2022)",
        y = "Frequency") +
-  theme_minimal() +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
 ggsave(file = here("Output", "Plots", "Distribution", "Distribution of FH Total Score.png"), width = 8, height = 6)
 
@@ -1014,7 +1074,7 @@ ggplot(fh, aes(x = `2022Status`)) +
   labs(title = "Distribution of Freedom House Status (2022)",
        x = "Freedom House Status (2022)",
        y = "Count") +
-  theme_minimal() +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
 ggsave(file = here("Output", "Plots", "Distribution", "Distribution of FH Status.png"), width = 8, height = 6)
 table(fh$`2022Status`)
@@ -1025,7 +1085,7 @@ ggplot(fh, aes(x = `PR_2022_recoded`)) +
   labs(title = "Distribution of Freedom House Political Rights Score (2022)",
        x = "Freedom House Political Rights Score (2022)",
        y = "Frequency") +
-  theme_minimal() +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
 ggsave(file = here("Output", "Plots", "Distribution", "Distribution of FH Political Rights Score.png"), width = 8, height = 6)
 summary(fh$`PR_2022_recoded`)
@@ -1036,7 +1096,7 @@ ggplot(fh, aes(x = `2022PR rating`)) +
   labs(title = "Distribution of Freedom House Political Rights Rating (2022)",
        x = "Freedom House Political Rights Rating (2022)",
        y = "Count") +
-  theme_minimal() +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
 ggsave(file = here("Output", "Plots", "Distribution", "Distribution of FH Political Rights Rating.png"), width = 8, height = 6)
 table(fh$`2022PR rating`)
@@ -1047,7 +1107,7 @@ ggplot(fh, aes(x = `2022CL`)) +
   labs(title = "Distribution of Freedom House Civil Liberties Score (2022)",
        x = "Freedom House Civil Liberties Score (2022)",
        y = "Frequency") +
-  theme_minimal() +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
 ggsave(file = here("Output", "Plots", "Distribution", "Distribution of FH Civil Liberties Score.png"), width = 8, height = 6)
 summary(fh$`2022CL`)
@@ -1058,103 +1118,105 @@ ggplot(fh, aes(x = `2022CL rating`)) +
   labs(title = "Distribution of Freedom House Civil Liberties Rating (2022)",
        x = "Freedom House Civil Liberties Rating (2022)",
        y = "Count") +
-  theme_minimal() +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
 ggsave(file = here("Output", "Plots", "Distribution", "Distribution of FH Civil Liberties Rating.png"), width = 8, height = 6)
 table(fh$`2022CL rating`)
 
 
-# . Illustration Generation (Experimental) ----------------------------------------------
+# 10. Descriptive Statistics - Tables -------------------------------------
 
-# Install necessary packages if you haven't already
-# install.packages("ggplot2")
-# install.packages("ggforce")
-# install.packages("patchwork")
+# V-Dem
+table(vdem$Pop_cat_2022)
 
-# Load the libraries
-library(ggplot2)
-library(ggforce) # For geom_circle
-library(patchwork) # For combining plots
+# Dist of V-Dem Democracy Score
+summary(vdem$`2022V_Dem`)
 
-# --- Define data for the circles ---
-# We estimate positions and sizes based on the image.
-# x0, y0 are center coordinates, r is the radius.
-circle_past <- data.frame(x0 = 5, y0 = 5, r = 2.5)
-circle_future <- data.frame(x0 = 6, y0 = 3.5, r = 1.5) # Smaller, lower, slightly right
+# Dist of V-Dem Democracy Score Scaled
+summary(vdem$`2022V_Dem_scaled`)
 
-# --- Create the "Past" Plot ---
-p_past <- ggplot() +
-  # Set plot limits and maintain aspect ratio (makes circles look like circles)
-  coord_fixed(ratio = 1, xlim = c(0, 10), ylim = c(0, 10), expand = FALSE) +
-  
-  # Add the circle for the "Past"
-  geom_circle(data = circle_past, aes(x0 = x0, y0 = y0, r = r),
-              fill = NA, color = "black", linewidth = 0.8) +
-  
-  # Add the diagonal dashed line (approx. y = x)
-  # Using geom_segment for more control over start/end points
-  geom_segment(aes(x = 1, y = 1, xend = 9, yend = 9),
-               linetype = "dotted", color = "black", linewidth = 0.6) +
-  
-  # Add labels and title
-  labs(title = "Past",
-       x = "Heterogeneity Costs",
-       y = "Scale Advantages") +
-  
-  # Apply a minimal theme and customize
-  theme_minimal(base_size = 12) +
-  theme(
-    plot.title = element_text(hjust = 0.5, face = "bold"), # Center title
-    axis.text = element_blank(),        # Remove axis number labels
-    axis.ticks = element_blank(),       # Remove axis ticks
-    panel.grid = element_blank(),       # Remove grid lines
-    axis.title = element_text(size = 10) # Adjust axis title size
-  )
+# FH
+# Dist of Population Category
+table(fh$Pop_cat_2022)
 
-# --- Create the "Future" Plot ---
-p_future <- ggplot() +
-  # Set plot limits and maintain aspect ratio
-  coord_fixed(ratio = 1, xlim = c(0, 10), ylim = c(0, 10), expand = FALSE) +
-  
-  # Add the circle for the "Future"
-  geom_circle(data = circle_future, aes(x0 = x0, y0 = y0, r = r),
-              fill = NA, color = "black", linewidth = 0.8) +
-  
-  # Add the diagonal solid line (less steep than the past one, based on image)
-  # Adjust y-coordinates to make it less steep (e.g., starts lower, ends lower for same x range)
-  geom_segment(aes(x = 1, y = 2, xend = 9, yend = 7),
-               linetype = "solid", color = "black", linewidth = 0.6) +
-  
-  # Add labels and title (remove y-axis label for combined plot)
-  labs(title = "Future",
-       x = "Heterogeneity Costs",
-       y = NULL) + # Set y label to NULL
-  
-  # Apply minimal theme and customize
-  theme_minimal(base_size = 12) +
-  theme(
-    plot.title = element_text(hjust = 0.5, face = "bold"),
-    axis.text = element_blank(),
-    axis.ticks = element_blank(),
-    panel.grid = element_blank(),
-    axis.title.y = element_blank(), # Completely remove y-axis title space
-    axis.title.x = element_text(size = 10)
-  )
+# Dist of FH Total Score
+summary(fh$total_fh_2022)
 
-# --- Combine the plots side-by-side ---
-combined_plot <- p_past + p_future
+# Dist of FH Status
+table(fh$`2022Status`)
 
-# --- Add overall title and caption using patchwork ---
-final_plot <- combined_plot +
-  plot_annotation(
-    title = "Changing Dynamics of State Formation",
-    caption = "Source: Based on Lambais and Breiding 2019; Alesina and Spolaore 2005.\nNote: Axes represent qualitative 'Low' to 'High' ranges.",
-    theme = theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
-                  plot.caption = element_text(hjust = 0, size = 8)) # Left-align caption
-  )
+# Dist of FH Political Rights
+summary(fh$`PR_2022_recoded`)
 
-# --- Display the final plot ---
-print(final_plot)
+# Dist of FH PR rating
+table(fh$`2022PR rating`)
 
-# --- Optional: Save the plot ---
-# ggsave("state_formation_graph.png", plot = final_plot, width = 8, height = 4.5, dpi = 300)  
+# Dist of FH Civil Liberties
+summary(fh$`2022CL`)
+
+# Dist of FH CL rating
+table(fh$`2022CL rating`)
+
+
+## Distribtution of Controls
+# Dist of GDP per Capita
+summary(vdem$GDPpc_log_2022)
+summary(fh$GDPpc_log_2022)
+
+# Dist of Island Status
+table(vdem$island_state)
+table(fh$island_state)
+
+# Dist of Diffusion
+summary(vdem$diffusion_2022)
+summary(vdem$diffusion_2022_scaled)
+summary(fh$diffusion_fh_2022)
+
+# Dist of Communism
+summary(vdem$communist)
+summary(fh$communist)
+
+# Dist Region
+table(vdem$MENA)
+table(vdem$sub_saharan_africa)
+table(vdem$west_europe)
+table(vdem$latin_america)
+table(vdem$southeast_asia)
+table(vdem$central_asia)
+
+table(fh$MENA)
+table(fh$sub_saharan_africa)
+table(fh$west_europe)
+table(fh$latin_america)
+table(fh$southeast_asia)
+table(fh$central_asia)
+
+# Dist of Landlocked
+table(vdem$landlocked)
+table(fh$landlocked)
+
+# Dist of Area
+summary(vdem$area_log)
+summary(fh$area_log)
+
+# Dist of Latitude
+summary(vdem$lat_log)
+summary(fh$lat_log)
+
+
+# 11. Descriptive Statistics - Correlation Plots ---------------------------
+
+# V-Dem
+# Correlation plot of V-Dem variables
+vdem_cor <- vdem %>%
+  select(`2022V_Dem`, `2022V_Dem_scaled`, ) %>%
+  cor(use = "pairwise.complete.obs")
+vdem_cor_plot <- ggcorrplot(vdem_cor, 
+                             method = "circle", 
+                             type = "lower", 
+                             lab = TRUE, 
+                             title = "Correlation Plot of V-Dem Variables (2022)", 
+                             colors = c("red", "white", "blue"), 
+                             ggtheme = theme_bw())
+
+
