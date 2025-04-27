@@ -291,6 +291,16 @@ vif(modelF)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
 bptest(modelF)  # Breusch-Pagan test
 # no heteroscedasticity present
 
+# Check for proportional odds assumption
+install.packages("brant")
+library(brant)
+brant(modelF) # H0: Parallel Regression Assumption holds
+
+install.packages("pscl")
+library(pscl)
+pR2(modelF) # fit is good for a cat. model
+
+
 # 7. Pop_log_2022 (IV) - FH Status (DV) - polr() - CVs Extended (+ MENA, sub_saharan_africa, latin_america, west_europe, southeast_asia, central_asia) -------------
 
 # Model G: DV (FH Total Score) & IV (Log Pop) with more regional CVs (MENA, sub_saharan_africa, latin_america, west_europe, southeast_asia, central_asia)
@@ -315,6 +325,13 @@ modelG <- modelGc
 # Check for multicollinearity
 vif(modelG)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
 # lots of multicollinearity issues!!
+
+# Check for proportional odds assumption
+library(brant)
+brant(modelG) # H0: Parallel Regression Assumption holds
+
+library(pscl)
+pR2(modelG) # fit is good for a cat. model
 
 # 8. Pop_log_2022 (IV) - FH Status (DV) - polr() - CVs Maximal (landlocked, area(ln), Pop_Density, lat(ln))-------------------------------------------------------------------------
 
@@ -344,6 +361,13 @@ modelH <- modelHc
 # Check for multicollinearity
 vif(modelH)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
 # lots of multicollinearity issues!
+
+# Check for proportional odds assumption
+library(brant)
+brant(modelH) # H0: Parallel Regression Assumption holds
+
+library(pscl)
+pR2(modelH) # fit is good for a cat. model
 
 
 # 9. Pol Rights (DV) - Pop_log_2022 (IV) - OLS - CVs Benchmark --------------
@@ -440,6 +464,12 @@ modelJ <- modelJd
 vif(modelJ)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
 # VIF values are all < 5, indicating no multicollinearity issues
 
+# Check for proportional odds assumption
+library(brant)
+brant(modelJ) # H0: Parallel Regression Assumption holds
+
+library(pscl)
+pR2(modelJ) # fit is good for a cat. model
 
 # 11. Civ Rights (DV) - Pop_log_2022 (IV) - OLS - CVs Benchmark ----------------------------------
 
@@ -513,6 +543,10 @@ modelL <- modelLd
 # Check for multicollinearity
 vif(modelL)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
 # VIF values are all < 5, indicating no multicollinearity issues
+
+brant(modelL) # H0: Parallel Regression Assumption holds
+
+pR2(modelL) # fit is good for a cat. model
 
 
 # 13. FH Total Score (DV) - Pop_cat_2022 (IV) - OLS - CVs Benchmark-------------------------------------------------------------------------
@@ -624,20 +658,20 @@ stargazer(model4, modelM, type = "text",
 
 ## Continuous-IV Tests Summary FH & Vdem
 # Benchmark
-stargazer(model3_scaled, modelC, modelF, modelI, modelJ, modelK, modelL, type = "text", 
+stargazer(model7, modelC, modelF, modelI, modelJ, modelK, modelL, type = "text", 
           title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - All Benchmark")
 
 # Extended 
-stargazer(model5_scaled, modelD, modelG, type = "text", 
+stargazer(model9, modelD, modelG, type = "text", 
           title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - CV Extended")
 
 # Maximal
-stargazer(model6_scaled, modelE, modelH, type = "text", 
+stargazer(model10, modelE, modelH, type = "text", 
           title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - CV Maximal")
 
 
 ## Categorical-IV Tests Summary FH & Vdem
-stargazer(model4_scaled, modelM, type = "text", 
+stargazer(model8, modelM, type = "text", 
           covariate.labels = c("Population (Small)", "Population (Large)", "Population (Huge)",
                                "GDPpc log 2022", "Island State", "Diffusion scaled", "Communist",
           "Population (Small)", "Population (Large)", "Population (Huge)",
@@ -654,25 +688,25 @@ library(here)
 ## Saving with stargazer
 library(stargazer)
 # Save the table as a text file
-stargazer(model3_scaled, modelC, modelF, modelI, modelJ, modelK, modelL,
+stargazer(model7, modelC, modelF, modelI, modelJ, modelK, modelL,
           type = "text", # Output format is text
           out = here("Output", "Tables", "All_Benchmark_Stargazer.txt"), # Specify the output file name
           title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - All Benchmark")
 
 # Extended 
-stargazer(model5_scaled, modelD, modelG, type = "text",
+stargazer(model9, modelD, modelG, type = "text",
           out = here("Output", "Tables", "All_Extended_Stargazer.txt"), # Specify the output file name
           title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - CV Extended")
 
 # Maximal
-stargazer(model6_scaled, modelE, modelH, type = "text",
+stargazer(model10, modelE, modelH, type = "text",
           out = here("Output", "Tables", "All_Maximal_Stargazer.txt"), # Specify the output file name
           title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - CV Maximal")
 
 
 ## Same DV, but all model specifications
 # Vdem all model specifications
-stargazer(model3_scaled, model5_scaled, model6_scaled,
+stargazer(model7, model9, model10,
           type = "text", # Output format is text
           out = here("Output", "Tables", "Vdem_All_Spec_Stargazer.txt"), # Specify the output file name
           title = "Pop_log_2022 (IV) - Vdem (DV) - All Model Specifications")
@@ -704,14 +738,14 @@ stargazer(model4, modelM, type = "text",
 ## modelsummary
 library(modelsummary)
 modelsummary(
- list("Model 1" = model3_scaled, "Model 2" = modelC, "Model 3" = modelF, 
+ list("Model 1" = model7, "Model 2" = modelC, "Model 3" = modelF, 
     "Model 4" = modelI, "Model 5" = modelJ, "Model 6" = modelK, "Model 7" = modelL),
 #output = here("Output", "Tables", "All_Benchmark_Tinytable.txt"),
 title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - All Benchmark",
 stars = TRUE)
 
 modelsummary(
-  list("2022V_Dem_scaled" = model3_scaled, "total_fh_2022" = modelC, "2022Status" = modelF, 
+  list("2022V_Dem_scaled" = model7, "total_fh_2022" = modelC, "2022Status" = modelF, 
        "PR_2022_recoded" = modelI, "2022PR rating" = modelJ, "2022CL" = modelK, "2022CL rating" = modelL),
   #output = here("Output", "Tables", "All_Benchmark_Tinytable.txt"),
   title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - All Benchmark",

@@ -236,6 +236,9 @@ library(car)          # for crPlots(), vif()
 library(lmtest)       # for bptest()
 library(nortest)      # for ad.test() or use shapiro.test()
 
+par(mfrow = c(2, 2))
+plot(model3) # seems fine
+
 # Check for multicollinearity
 vif(model3)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
 # Vif < 2.5, no multicollinearity detected
@@ -289,6 +292,9 @@ library(car)          # for crPlots(), vif()
 library(lmtest)       # for bptest()
 library(nortest)      # for ad.test() or use shapiro.test()
 
+par(mfrow = c(2, 2))
+plot(model4) # seems fine
+
 # Check for multicollinearity
 vif(model4)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
 # Vif < 2.5, no multicollinearity detected
@@ -334,6 +340,9 @@ model5 <- model5c
 
 # Testing -----------------------------------------------------------------
 
+par(mfrow = c(2, 2))
+plot(model5) # seems fine
+
 # Check for multicollinearity
 vif(model5)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
 # Vif < 5, no multicollinearity detected
@@ -370,6 +379,9 @@ model6 <- model6c
 
 
 # Testing -----------------------------------------------------------------
+
+par(mfrow = c(2, 2))
+plot(model6) # seems fine
 
 # load required packages
 library(betareg)     # for betareg()
@@ -429,7 +441,11 @@ stargazer(model4, model4_scaled, type = "text",
 
 stargazer(model4, model4_scaled, type = "text", title = "Model Comparison: Pop_cat_2022 (IV) - 2022V_Dem (DV) - Unscaled + Scaled")
 
-
+# renaming models for better comparison with FH df
+model7 <- model3_scaled
+model8 <- model4_scaled
+model9 <- model5_scaled
+model10 <- model6_scaled
 
 # Testing Model3scaled ----------------------------------------------------
 
