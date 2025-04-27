@@ -127,6 +127,48 @@ modelC <- modelC4
 # much less magnitude. I suspect this is due to the many small island states
 
 
+# Testing -----------------------------------------------------------------
+
+# load required packages
+library(ggplot2)
+library(ggfortify)
+library(car)          # for crPlots(), vif()
+library(lmtest)       # for bptest()
+install.packages("nortest") # for ad.test() or use shapiro.test()
+library(nortest)      # for ad.test() or use shapiro.test()
+
+# visual diagnostic plots
+autoplot(modelC, which = 1:4, ncol = 2, label.id = NULL) +
+  theme_bw() 
+# Normality of residuals and homoscedasticity seem reasonably met
+# hint of potential non-linearity in the Residuals vs Fitted plot
+# Outliers: Belarus, Cuba, Venezuela, Bahrain, Brunei
+
+# 1. Formal test of linearity (component + residual plots)
+crPlots(modelC)
+# linearity assumption seems appropriate for all the continuous predictors
+# cat predictors show some differences between their groups in the expected direction based on the model fit, but the component+residual distributions overlap substantially, 
+# suggesting their unique contribution might be relatively small compared to the continuous predictors, particularly GDP and diffusion.
+
+# 2. Formal test of normality
+shapiro.test(residuals(modelC))  # for small samples (< 5000)
+# p = 0.004 -> residuals are not normally distributed
+
+# 3. Check for multicollinearity
+vif(modelC)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
+# VIF values are all < 2.5, indicating no multicollinearity issues
+
+# 4. Formal test for homoscedasticity (constant variance)
+bptest(modelC)  # Breusch-Pagan test
+# p = 0.2 -> no heteroscedasticity present
+
+# Interpretation quick guide:
+#	Linearity: crPlots() — plots should look roughly linear.
+#	Normality: shapiro.test() p > 0.05 → residuals normal.
+#	Multicollinearity: vif() values < 5 → acceptable.
+#	Homoscedasticity: bptest() p > 0.05 → no heteroscedasticity.
+
+
 # 4. Pop_log_2022 (IV) - FH Total Score (DV) - OLS - CVs Extended (+ MENA, sub_saharan_africa, latin_america, west_europe, southeast_asia, central_asia) --------------
 
 # Model D: DV (FH Total Score) & IV (Log Pop) with more regional CVs (MENA, sub_saharan_africa, latin_america, west_europe, southeast_asia, central_asia)
@@ -144,6 +186,30 @@ modelD3 <- lm(fh$total_fh_2022 ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island
 
 stargazer(modelC, modelD1, modelD2, modelD3, type = "text", title = "Pop_log_2022 (IV) - FH Total Score (DV) - OLS - CVs Extended")
 modelD <- modelD3
+
+
+# Testing -----------------------------------------------------------------
+
+# visual diagnostic plots
+autoplot(modelD, which = 1:4, ncol = 2, label.id = NULL) +
+  theme_bw()
+# Normality of residuals and homoscedasticity seem reasonably met
+
+# 1. Formal test of linearity (component + residual plots)
+crPlots(modelD)
+# linearity assumption seems appropriate for all the continuous predictors
+
+# 2. Formal test of normality
+shapiro.test(residuals(modelD))  # for small samples (< 5000)
+# residuals are not normally distributed
+
+# 3. Check for multicollinearity
+vif(modelD)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
+# VIF values are all < 5, indicating no multicollinearity issues
+
+# 4. Formal test for homoscedasticity (constant variance)
+bptest(modelD)  # Breusch-Pagan test
+# no heteroscedasticity present
 
 
 # 5. Pop_log_2022 (IV) - FH Total Score (DV) - OLS - CVs Maximal (+ landlocked, area(ln), lat(ln)) --------------------------------------------------------------------
@@ -171,6 +237,35 @@ stargazer(modelD3, modelE1, modelE2, modelE3, type = "text", title = "Pop_log_20
 modelE <- modelE3
 # lat (ln) has neg. effect. is against the theory.
 
+
+# Testing -----------------------------------------------------------------
+
+# visual diagnostic plots
+autoplot(modelE, which = 1:4, ncol = 2, label.id = NULL) +
+  theme_bw()
+# Normality of residuals and homoscedasticity seem reasonably met
+
+# 1. Formal test of linearity (component + residual plots)
+crPlots(modelE)
+
+# 2. Formal test of normality
+shapiro.test(residuals(modelE))  # for small samples (< 5000)
+# residuals are not normally distributed
+
+# 3. Check for multicollinearity
+vif(modelE)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
+# VIF values are all < 5, indicating no multicollinearity issues
+
+# 4. Formal test for homoscedasticity (constant variance)
+bptest(modelE)  # Breusch-Pagan test
+# no heteroscedasticity present
+
+# Interpretation quick guide:
+#	Linearity: crPlots() — plots should look roughly linear.
+#	Normality: shapiro.test() p > 0.05 → residuals normal.
+#	Multicollinearity: vif() values < 5 → acceptable.
+#	Homoscedasticity: bptest() p > 0.05 → no heteroscedasticity.
+
 # 6. Pop_log_2022 (IV) - FH Status (DV) - polr() - CVs Benchmark (GDPpc_log_2022, island_state, diffusion_2022, communist) -------------
 
 # Model F: DV (FH Status) & IV (Log Pop) with CVs Benchmark (Log GDP per Capita, island_state, diffusion variable, communist)
@@ -185,6 +280,16 @@ modelFd <- polr(fh$`2022Status` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$islan
 stargazer(modelFa, modelFb, modelFc, modelFd, type = "text", title= "DV (FH Status) & IV (Log Pop) with CVs Benchmark")
 modelF <- modelFd
 
+
+# Testing -----------------------------------------------------------------
+
+# Check for multicollinearity
+vif(modelF)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
+# VIF values are all < 5, indicating no multicollinearity issues
+
+# Formal test for homoscedasticity (constant variance)
+bptest(modelF)  # Breusch-Pagan test
+# no heteroscedasticity present
 
 # 7. Pop_log_2022 (IV) - FH Status (DV) - polr() - CVs Extended (+ MENA, sub_saharan_africa, latin_america, west_europe, southeast_asia, central_asia) -------------
 
@@ -204,6 +309,12 @@ modelGc <- polr(fh$`2022Status` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$islan
 stargazer(modelFd, modelGa, modelGb, modelGc, type = "text", title= "DV (FH Status) & IV (Log Pop) with CVs Extended")
 modelG <- modelGc
 
+
+# Testing -----------------------------------------------------------------
+
+# Check for multicollinearity
+vif(modelG)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
+# lots of multicollinearity issues!!
 
 # 8. Pop_log_2022 (IV) - FH Status (DV) - polr() - CVs Maximal (landlocked, area(ln), Pop_Density, lat(ln))-------------------------------------------------------------------------
 
@@ -228,6 +339,13 @@ stargazer(modelGc, modelHa, modelHb, modelHc, type = "text", title= "DV (FH Stat
 modelH <- modelHc
 
 
+# Testing -----------------------------------------------------------------
+
+# Check for multicollinearity
+vif(modelH)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
+# lots of multicollinearity issues!
+
+
 # 9. Pol Rights (DV) - Pop_log_2022 (IV) - OLS - CVs Benchmark --------------
 
 range(fh$`2022PR`) # There negative values. This could be a problem for OLS regression.
@@ -248,10 +366,28 @@ stargazer(modelI1, modelI2, modelI3, modelI4, modelI5, type = "text", title = "P
 modelI <- modelI5
 
 
-# Generate standard diagnostic plots (Residuals vs Fitted, Q-Q, Scale-Location, Residuals vs Leverage)
-autoplot(modelI, which = 1:4, ncol = 2, label.id = NULL) + # Use which=1:6 for all 6 plots
-  theme_bw() 
+# Testing -----------------------------------------------------------------
 
+# visual diagnostic plots
+autoplot(modelI, which = 1:4, ncol = 2, label.id = NULL) +
+  theme_bw()
+# Normality of residuals and homoscedasticity seem reasonably met
+
+# 1. Formal test of linearity (component + residual plots)
+crPlots(modelI)
+# linearity assumption seems appropriate for all the continuous predictors
+
+# 2. Formal test of normality
+shapiro.test(residuals(modelI))  # for small samples (< 5000)
+# residuals are not normally distributed
+
+# 3. Check for multicollinearity
+vif(modelI)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
+# VIF values are all < 5, indicating no multicollinearity issues
+
+# 4. Formal test for homoscedasticity (constant variance)
+bptest(modelI)  # Breusch-Pagan test
+# no heteroscedasticity present
 
 # betareg() for 2022PR ----------------------------------------------------
 
@@ -298,6 +434,13 @@ stargazer(modelJa, modelJb, modelJc, modelJd, type = "text", title= "DV (2022PR 
 modelJ <- modelJd
 
 
+# Testing -----------------------------------------------------------------
+
+# Check for multicollinearity
+vif(modelJ)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
+# VIF values are all < 5, indicating no multicollinearity issues
+
+
 # 11. Civ Rights (DV) - Pop_log_2022 (IV) - OLS - CVs Benchmark ----------------------------------
 
 range(fh$`2022CL`)
@@ -320,6 +463,30 @@ modelK <- modelK4
 # between pop size and democracy levels.
 
 
+# Testing -----------------------------------------------------------------
+
+# visual diagnostic plots
+autoplot(modelK, which = 1:4, ncol = 2, label.id = NULL) +
+  theme_bw()
+# Normality of residuals and homoscedasticity seem reasonably met
+
+# 1. Formal test of linearity (component + residual plots)
+crPlots(modelK)
+# linearity assumption seems appropriate for all the continuous predictors
+
+# 2. Formal test of normality
+shapiro.test(residuals(modelK))  # for small samples (< 5000)
+# residuals are not normally distributed
+
+# 3. Check for multicollinearity
+vif(modelK)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
+# VIF values are all < 5, indicating no multicollinearity issues
+
+# 4. Formal test for homoscedasticity (constant variance)
+bptest(modelK)  # Breusch-Pagan test
+# no heteroscedasticity present
+
+
 # 12. `2022CL rating` (DV) - Pop_log_2022 (IV) - polr() - CVs Benchmark-----------------
 
 fh$`2022CL rating` <- factor(fh$`2022CL rating`, levels = c(7, 6, 5, 4, 3, 2, 1), ordered = TRUE)
@@ -339,6 +506,13 @@ stargazer(modelLa, modelLb, modelLc, modelLd, type = "text", title= "DV (2022PR 
 modelL <- modelLd
 
 # Same here, very strong sig. neg. relationship. There is something here.
+
+
+# Testing -----------------------------------------------------------------
+
+# Check for multicollinearity
+vif(modelL)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
+# VIF values are all < 5, indicating no multicollinearity issues
 
 
 # 13. FH Total Score (DV) - Pop_cat_2022 (IV) - OLS - CVs Benchmark-------------------------------------------------------------------------
@@ -369,6 +543,30 @@ stargazer(modelMa, modelMb, modelMc, modelMd, type = "text",
                                "Diffusion", "Communist", "Pop (Micro)/Intercept"),
           title = "Pop_cat (IV) - FH Total Score (DV) - OLS - CVs Benchmark")
 modelM <- modelMd
+
+
+# Testing -----------------------------------------------------------------
+
+# visual diagnostic plots
+autoplot(modelM, which = 1:4, ncol = 2, label.id = NULL) +
+  theme_bw()
+# Normality of residuals and homoscedasticity seem reasonably met
+
+# 1. Formal test of linearity (component + residual plots)
+crPlots(modelM)
+# linearity assumption seems appropriate for all the continuous predictors
+
+# 2. Formal test of normality
+shapiro.test(residuals(modelM))  # for small samples (< 5000)
+# residuals are not normally distributed
+
+# 3. Check for multicollinearity
+vif(modelM)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
+# VIF values are all < 5, indicating no multicollinearity issues
+
+# 4. Formal test for homoscedasticity (constant variance)
+bptest(modelM)  # Breusch-Pagan test
+# no heteroscedasticity present
 
 
 # 14. Model Comparisons ----------------------------------------------------
@@ -524,3 +722,6 @@ modelsummary(
   #output = here("Output", "Tables", "Cat_Benchmark_Tinytable.txt"),
   title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - All Benchmark",
   stars = TRUE)
+
+
+

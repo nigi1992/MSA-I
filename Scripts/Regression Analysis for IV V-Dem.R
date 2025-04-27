@@ -226,36 +226,29 @@ model3_fractional <- glm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2
 summary(model3_fractional) # Not much better...
 
 
-# Interaction Effects & Robustness Checks ----------------
-model3d <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + 
-                     vdem$communist, data = vdem)
+# Testing -----------------------------------------------------------------
 
-# Interaction between Pop_log_2022 and GDPpc_log_2022
-model3_inter1 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 * vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + 
-                           vdem$communist, data = vdem)
-# Interaction between Pop_log_2022 and diffusion_2022
-model3_inter2 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 * vdem$diffusion_2022 + vdem$GDPpc_log_2022 + vdem$island_state + 
-                           vdem$communist, data = vdem)
-# Interaction between Pop_log_2022 and communist
-model3_inter3 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 * vdem$communist + vdem$GDPpc_log_2022 + vdem$island_state + 
-                           vdem$diffusion_2022, data = vdem)
+# load required packages
+library(betareg)     # for betareg()
+library(ggplot2)
+library(ggfortify)
+library(car)          # for crPlots(), vif()
+library(lmtest)       # for bptest()
+library(nortest)      # for ad.test() or use shapiro.test()
 
-summary(model3_inter1) 
-# The interaction between population and GDP per capita is not significant, meaning the effect of population size on democracy is not conditional on GDP per capita
-summary(model3_inter2)
-# The interaction between population and democratic diffusion is not significant, meaning the effect of population size on democracy does not depend on the regional democratic environment.
-summary(model3_inter3)
-# The interaction between population and communist regime form is significant, meaning the effect of population size on democracy is at least partially conditional on the type of regime.
-# Though it is very small .008
-cor(vdem$Pop_log_2022, vdem$communist) # No sig. cor.
+# Check for multicollinearity
+vif(model3)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
+# Vif < 2.5, no multicollinearity detected
 
+# Formal test for homoscedasticity (constant variance)
+bptest(model3)  # Breusch-Pagan test
+# p > 0.05 → no heteroscedasticity
 
-library(car)
-# Checking multicollinearity
-vif(lm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$communist, data = vdem))
-# VIF < 5 for all variables → No serious multicollinearity issues. Generally, VIF > 5 indicates high collinearity, and VIF > 10 is a strong concern.
-#	Since all values are close to 1, this suggests that none of the independent variables are strongly correlated with each other.
-# Multicollinearity is not a concern in this model.
+# Interpretation quick guide:
+#	Linearity: crPlots() — plots should look roughly linear.
+#	Normality: shapiro.test() p > 0.05 → residuals normal.
+#	Multicollinearity: vif() values < 5 → acceptable.
+#	Homoscedasticity: bptest() p > 0.05 → no heteroscedasticity.
 
 
 # 4. Cat_pop_2022 (IV) - V_Dem (DV) - polr() - CVs Benchmark (GDPpc_log_2022, island_state, diffusion_2022, communist)  -------
@@ -286,25 +279,29 @@ stargazer(model4a, model4b, model4c, model4d, type = "text",
 model4 <- model4d
 
 
-# Interaction Effects & Robustness Checks ----------------
-model4 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$communist, data = vdem)
+# Testing -----------------------------------------------------------------
 
-# Interaction between Pop_cat_2022 and GDPpc_log_2022
-model4_inter1 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 * vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$communist, data = vdem)
-summary(model4_inter1)
+# load required packages
+library(betareg)     # for betareg()
+library(ggplot2)
+library(ggfortify)
+library(car)          # for crPlots(), vif()
+library(lmtest)       # for bptest()
+library(nortest)      # for ad.test() or use shapiro.test()
 
-# Interaction between Pop_cat_2022 and diffusion_2022
-model4_inter2 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 * vdem$diffusion_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$communist, data = vdem)
-summary(model4_inter2)
+# Check for multicollinearity
+vif(model4)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
+# Vif < 2.5, no multicollinearity detected
 
-model4_inter3 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 * vdem$communist + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022, data = vdem)
-summary(model4_inter3)
-# No sig. interaction effects between Pop_cat_2022 and GDPpc_log_2022 or diffusion_2022 or communist
+# Formal test for homoscedasticity (constant variance)
+bptest(model4)  # Breusch-Pagan test
+# p > 0.05 → no heteroscedasticity
 
-library(car)
-# Checking multicollinearity
-vif(lm(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$communist, data = vdem))
-# VIF < 5 for all variables → No serious multicollinearity issues. Generally, VIF > 5 indicates high collinearity, and VIF > 10 is a strong concern.
+# Interpretation quick guide:
+#	Linearity: crPlots() — plots should look roughly linear.
+#	Normality: shapiro.test() p > 0.05 → residuals normal.
+#	Multicollinearity: vif() values < 5 → acceptable.
+#	Homoscedasticity: bptest() p > 0.05 → no heteroscedasticity.
 
 
 # 5. Pop_log_2022 (IV) - V_Dem (DV) - betareg() - CVs Extended (+ MENA, sub_saharan_africa, latin_america, west_europe, southeast_asia, central_asia) -----------------------------------------------------------------------
@@ -335,6 +332,17 @@ model5 <- model5c
 # R² increases from 0.455 to 0.555 across models
 
 
+# Testing -----------------------------------------------------------------
+
+# Check for multicollinearity
+vif(model5)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
+# Vif < 5, no multicollinearity detected
+
+# Formal test for homoscedasticity (constant variance)
+bptest(model5)  # Breusch-Pagan test
+# p < 0.05 → heteroscedasticity present
+
+
 # 6. Pop_log_2022 (IV) - V_Dem (DV) - betareg() - CVs Maximal (+ landlocked, area(ln), lat(ln)) -------------
 
 range(vdem$lat_log)
@@ -361,7 +369,23 @@ stargazer(model5, model6a, model6b, model6c, type = "text", title = "Pop_log_202
 model6 <- model6c
 
 
-# Interaction Effects & Robustness Checks ---------------------------------
+# Testing -----------------------------------------------------------------
+
+# load required packages
+library(betareg)     # for betareg()
+library(ggplot2)
+library(ggfortify)
+library(car)          # for crPlots(), vif()
+library(lmtest)       # for bptest()
+library(nortest)      # for ad.test() or use shapiro.test()
+
+# Check for multicollinearity
+vif(model6)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
+# Vif < 5, no multicollinearity detected
+
+# Formal test for homoscedasticity (constant variance)
+bptest(model6)  # Breusch-Pagan test
+# p < 0.05 → heteroscedasticity present
 
 
 # 7. Model Comparison (unscaled) -----------------------------------------------------
@@ -406,55 +430,96 @@ stargazer(model4, model4_scaled, type = "text",
 stargazer(model4, model4_scaled, type = "text", title = "Model Comparison: Pop_cat_2022 (IV) - 2022V_Dem (DV) - Unscaled + Scaled")
 
 
-# Next Steps - Proposals -------------------------------------------------------
 
-# 1. Check for multicollinearity
-# 2. Check for heteroskedasticity
-# 3. Check for normality of residuals
-# 4. Consider alternative specifications or transformations of variables
-# 5. Consider interaction effects or non-linear relationships
-# 6. Consider robustness checks or sensitivity analysis
-# 7. Consider additional control variables or model specifications
-# 8. Interpret the results and consider implications for theory
+# Testing Model3scaled ----------------------------------------------------
 
+# visual diagnostic plots
+autoplot(model3_scaled, which = 1:4, ncol = 2, label.id = NULL) +
+  theme_bw()
+# assumptions of normality and homoscedasticity appear to be reasonably met
+# very slight non-linearity, but it doesn't seem severe based on the Residuals vs Fitted plot
+# Bosnia, Nicaragua, South Korea are outliers
+# Bahrain, Cuba and Quatar are high influence points
 
-# Interaction Effects & Robustness Checks ---------------------------------
+# 1. Formal test of linearity (component + residual plots)
+crPlots(model3_scaled)
+# linearity assumption seems appropriate for the continuous predictors 
 
-# Interaction Effects & Robustness Checks ---------------------------------
+# 2. Formal test of normality
+shapiro.test(residuals(model3_scaled))  # for small samples (< 5000)
+# p < 0.05 → residuals are not normally distributed
 
-# Log-Likelihood
-logLik(model5)             # For betareg
+# 3. Check for multicollinearity
+vif(model3_scaled)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
+# vif < 2.5 → no multicollinearity
 
-# AIC (only for betareg, as quasibinomial doesn't have it)
-AIC(model5)
-
-# Pseudo R² for Beta regression
-1 - (model5$deviance / model5$null.deviance)  # McFadden's R²
-
-# Precision parameter for Beta regression
-summary(model5)$phi  # Higher values = more precise estimates# Log-Likelihood
-logLik(model5)             # For betareg
+# 4. Formal test for homoscedasticity (constant variance)
+bptest(model3_scaled)  # Breusch-Pagan test
+# p > 0.05 → no heteroscedasticity
 
 
-# Pseudo R² for Beta regression
-#1 - (model5$deviance / model5$null.deviance)  # McFadden's R²
-pseudo_r2 <- 1 - (summary(model5)$deviance / summary(model5)$null.deviance)
-print(pseudo_r2)
+# Testing Model4scaled ----------------------------------------------------
+# visual diagnostic plots
+autoplot(model4_scaled, which = 1:4, ncol = 2, label.id = NULL) +
+  theme_bw()
+# 1. Formal test of linearity (component + residual plots)
+crPlots(model4_scaled)
+# 2. Formal test of normality
+shapiro.test(residuals(model4_scaled))  # for small samples (< 5000)
+# 3. Check for multicollinearity
+vif(model4_scaled)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
+# 4. Formal test for homoscedasticity (constant variance)
+bptest(model4_scaled)  # Breusch-Pagan test
+# all test same as above!
 
-# Precision parameter for Beta regression
-summary(model5)$phi  # Higher values = more precise estimates
+# Testing Model5scaled ----------------------------------------------------
 
-#Beta regression (model5) seems to be the better model because:
-#•	It has a valid log-likelihood (76.75).
-#•	The AIC is very low (-127.5), suggesting a good fit.
-#•	The quasibinomial dispersion is too low (0.149), meaning it may not properly capture variability in the data.
-#•	Beta regression explicitly models dispersion through phi, making it more reliable for fractional outcomes.
+# visual diagnostic plots
+autoplot(model5_scaled, which = 1:4, ncol = 2, label.id = NULL) +
+  theme_bw()
+
+# 1. Formal test of linearity (component + residual plots)
+crPlots(model5_scaled)
+
+# 2. Formal test of normality
+shapiro.test(residuals(model5_scaled))  # for small samples (< 5000)
+# p < 0.05 → residuals are not normally distributed
+
+# 3. Check for multicollinearity
+vif(model5_scaled)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
+# no issues
+
+# 4. Formal test for homoscedasticity (constant variance)
+bptest(model5_scaled)  # Breusch-Pagan test
+# no good
 
 
-## next? - check for multicollinearity, check for outliers, check for heteroscedasticity, check for normality of residuals, check for zero inflation, check for overdispersion
+# Testing Model6scaled ----------------------------------------------------
 
-## robustness checks? -  check for different time periods, check for different DVs (FH!), check for different controls, 
+# visual diagnostic plots
+autoplot(model6_scaled, which = 1:4, ncol = 2, label.id = NULL) +
+  theme_bw()
 
-# The felm() function in R, provided by the "lfe" package, is used to fit linear models with large fixed effects. It is particularly useful for handling panel data or models with multiple group fixed effects, allowing for efficient estimation and inference in high-dimensional fixed effects regression settings.
+# 1. Formal test of linearity (component + residual plots)
+crPlots(model6_scaled)
+# lat log very odd distribution
 
-# The plm() function in R, provided by the "plm" package, is used to fit linear models with panel data. It is particularly useful for handling panel data or models with multiple group fixed effects, allowing for efficient estimation and inference in high-dimensional fixed effects regression settings.
+# 2. Formal test of normality
+shapiro.test(residuals(model6_scaled))  # for small samples (< 5000)
+# p < 0.05 → residuals are not normally distributed, but almost!
+
+# 3. Check for multicollinearity
+vif(model6_scaled)   # Variance Inflation Factor, should be < 5 (preferably < 2.5)
+# no issues
+
+# 4. Formal test for homoscedasticity (constant variance)
+bptest(model6_scaled)  # Breusch-Pagan test
+# p < 0.05 → heteroscedasticity present
+
+# Interpretation quick guide:
+#	Linearity: crPlots() — plots should look roughly linear.
+#	Normality: shapiro.test() p > 0.05 → residuals normal.
+#	Multicollinearity: vif() values < 5 → acceptable.
+#	Homoscedasticity: bptest() p > 0.05 → no heteroscedasticity.
+
+

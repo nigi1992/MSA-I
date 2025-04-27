@@ -372,3 +372,111 @@ print(final_plot)
 # ggsave("state_formation_graph.png", plot = final_plot, width = 8, height = 4.5, dpi = 300)  
 
 
+# Interaction Effects ----------------
+model3d <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + 
+                     vdem$communist, data = vdem)
+
+# Interaction between Pop_log_2022 and GDPpc_log_2022
+model3_inter1 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 * vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + 
+                           vdem$communist, data = vdem)
+# Interaction between Pop_log_2022 and diffusion_2022
+model3_inter2 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 * vdem$diffusion_2022 + vdem$GDPpc_log_2022 + vdem$island_state + 
+                           vdem$communist, data = vdem)
+# Interaction between Pop_log_2022 and communist
+model3_inter3 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 * vdem$communist + vdem$GDPpc_log_2022 + vdem$island_state + 
+                           vdem$diffusion_2022, data = vdem)
+# Interaction between Pop_log_2022 and Island_state
+model3_inter4 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 * vdem$island_state + vdem$GDPpc_log_2022 + vdem$communist + 
+                           vdem$diffusion_2022, data = vdem)
+
+summary(model3_inter1) 
+# The interaction between population and GDP per capita is not significant, meaning the effect of population size on democracy is not conditional on GDP per capita
+summary(model3_inter2)
+# The interaction between population and democratic diffusion is not significant, meaning the effect of population size on democracy does not depend on the regional democratic environment.
+summary(model3_inter3)
+# The interaction between population and communist regime form is significant, meaning the effect of population size on democracy is at least partially conditional on the type of regime.
+cor(vdem$Pop_log_2022, as.numeric(vdem$communist)) # no sig. cor.
+summary(model3_inter4) # The interaction between population and island state is not significant, meaning the effect of population size on democracy is not conditional on being an island state.
+
+stargazer(model3, model3_inter3, type="text")
+
+# Interaction Effects ----------------
+model4 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$communist, data = vdem)
+
+# Interaction between Pop_cat_2022 and GDPpc_log_2022
+model4_inter1 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 * vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022 + vdem$communist, data = vdem)
+summary(model4_inter1)
+
+# Interaction between Pop_cat_2022 and diffusion_2022
+model4_inter2 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 * vdem$diffusion_2022 + vdem$GDPpc_log_2022 + vdem$island_state + vdem$communist, data = vdem)
+summary(model4_inter2)
+
+model4_inter3 <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_cat_2022 * vdem$communist + vdem$GDPpc_log_2022 + vdem$island_state + vdem$diffusion_2022, data = vdem)
+summary(model4_inter3)
+# No sig. interaction effects between Pop_cat_2022 and GDPpc_log_2022 or diffusion_2022 or communist
+
+
+# Interaction Effects & Robustness Checks ---------------------------------
+
+# Log-Likelihood
+logLik(model5)             # For betareg
+
+# AIC (only for betareg, as quasibinomial doesn't have it)
+AIC(model5)
+
+# Pseudo R² for Beta regression
+1 - (model5$deviance / model5$null.deviance)  # McFadden's R²
+
+# Precision parameter for Beta regression
+summary(model5)$phi  # Higher values = more precise estimates# Log-Likelihood
+logLik(model5)             # For betareg
+
+
+# Pseudo R² for Beta regression
+#1 - (model5$deviance / model5$null.deviance)  # McFadden's R²
+pseudo_r2 <- 1 - (summary(model5)$deviance / summary(model5)$null.deviance)
+print(pseudo_r2)
+
+# Precision parameter for Beta regression
+summary(model5)$phi  # Higher values = more precise estimates
+
+#Beta regression (model5) seems to be the better model because:
+#•	It has a valid log-likelihood (76.75).
+#•	The AIC is very low (-127.5), suggesting a good fit.
+#•	The quasibinomial dispersion is too low (0.149), meaning it may not properly capture variability in the data.
+#•	Beta regression explicitly models dispersion through phi, making it more reliable for fractional outcomes.
+
+# The felm() function in R, provided by the "lfe" package, is used to fit linear models with large fixed effects. 
+# It is particularly useful for handling panel data or models with multiple group fixed effects, allowing for efficient estimation and inference in high-dimensional fixed effects regression settings.
+
+# The plm() function in R, provided by the "plm" package, is used to fit linear models with panel data. 
+# It is particularly useful for handling panel data or models with multiple group fixed effects, allowing for efficient estimation and inference in high-dimensional fixed effects regression settings.
+
+# Interaction Effects -----------------------------------------------------
+
+# Interaction between Pop_log_2022 and GDPpc_log_2022
+modelC_inter1 <- lm(fh$total_fh_2022 ~ fh$Pop_log_2022 * fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$communist, data = fh)
+# Interaction between Pop_log_2022 and diffusion_2022
+modelC_inter2 <- lm(fh$total_fh_2022 ~ fh$Pop_log_2022 * fh$diffusion_fh_2022 + fh$island_state + fh$GDPpc_log_2022 + fh$communist, data = fh)
+# Interaction between Pop_log_2022 and communist
+modelC_inter3 <- lm(fh$total_fh_2022 ~ fh$Pop_log_2022 * fh$communist + fh$island_state + fh$diffusion_fh_2022 + fh$GDPpc_log_2022, data = fh)
+# Interaction between Pop_log_2022 and island_state
+modelC_inter4 <- lm(fh$total_fh_2022 ~ fh$Pop_log_2022 * fh$island_state + fh$diffusion_fh_2022 + fh$GDPpc_log_2022 + fh$communist, data = fh)
+
+summary(modelC_inter1) 
+# The interaction between population size and GDP per capita is marginally significant, suggesting the effect of population might depend on GDP per capita.
+summary(modelC_inter2)
+# The interaction term has a very high p-value (0.870), meaning no interaction effect.
+summary(modelC_inter3)
+# The interaction term is negative and significant
+summary(modelC_inter4) # interatction term not significant and positive
+
+stargazer(modelC, modelC_inter3, type = "text")
+par(mfrow = c(2,2))
+plot(modelC_inter3)
+anova(modelC, modelC_inter3)
+
+
+
+
+

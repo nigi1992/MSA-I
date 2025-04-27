@@ -482,7 +482,6 @@ ggplot(control_values_modelC, aes(x = Pop_log_2022, y = predicted)) +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
 ggsave(file = here("Output", "Plots", "Relationship", "Predicted FH Total Score by Pop 2022.png"), width = 8, height = 6)
-#ggsave(file = here("Output", "Predicted FH Total Score by Pop 2022.png"), width = 8, height = 6)
 
 
 ggplot(control_values_modelC, aes(x = Pop_log_2022, y = predicted)) +
@@ -691,12 +690,13 @@ ggplot(control_values_modelI, aes(x = Pop_log_2022, y = predicted)) +
     labels = c("F" = "Free", "PF" = "Partly Free", "NF" = "Not Free")
   ) +
   labs(
-    title = "Effect of Population (Log) on FH Total Score",
+    title = "Effect of Population (Log) on Political Rights Score",
     x = "Log of Population (2022)",
     y = "Predicted Political Rights Score (PR) for 2022",
     color = "FH Status 2022") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
+ggsave(file = here("Output", "Plots", "Relationship", "Predicted PR Score by Pop 2022.png"), width = 8, height = 6)
 #ggsave(file = here("Output", "Predicted FH Total Score by Pop 2022.png"), width = 8, height = 6)
   
   
@@ -710,7 +710,7 @@ ggplot(control_values_modelI, aes(x = Pop_log_2022, y = predicted)) +
             fontface = "bold",
             check_overlap = TRUE, size = 3, hjust = 0.5, vjust = -0.5, alpha=2, show.legend = FALSE) +
   labs(
-    title = "Effect of Population (Log) on FH Total Score",
+    title = "Effect of Population (Log) on PR Score",
     x = "Log of Population (2022)",
     y = "Predicted Political Rights Score (PR) for 2022",
     color = "FH Status 2022") +
@@ -823,7 +823,7 @@ ggplot(control_values_modelK, aes(x = Pop_log_2022, y = predicted)) +
   geom_smooth(method = "lm", se = TRUE, color = "blue") +
   #geom_smooth(method = "loess", se = TRUE, span=1, color = "blue") +
   labs(
-    title = "Civil Liberties Score (FH) by Population Size (ln)",
+    title = "Civil Liberties Score (CL) by Population Size (ln)",
     x = "Population Size (ln) for 2022",
     y = "Predicted Civil Liberties Score (CL) for 2022"
   ) +
@@ -845,12 +845,13 @@ ggplot(control_values_modelK, aes(x = Pop_log_2022, y = predicted)) +
     labels = c("F" = "Free", "PF" = "Partly Free", "NF" = "Not Free")
   ) +
   labs(
-    title = "Civil Liberties Score (FH) by Population Size (ln)",
+    title = "Civil Liberties Score (CL) by Population Size (ln)",
     x = "Log of Population (2022)",
     y = "Predicted Civil Liberties Score (CL) for 2022",
     color = "FH Status 2022") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
+ggsave(file = here("Output", "Plots", "Relationship", "Predicted CL Score by Pop 2022.png"), width = 8, height = 6)
 
 
 ggplot(control_values_modelK, aes(x = Pop_log_2022, y = predicted)) +
@@ -863,7 +864,7 @@ ggplot(control_values_modelK, aes(x = Pop_log_2022, y = predicted)) +
             fontface = "bold",
             check_overlap = TRUE, size = 3, hjust = 0.5, vjust = -0.5, alpha=2, show.legend = FALSE) +
   labs(
-    title = "Civil Liberties Score (FH) by Population Size (ln)",
+    title = "Civil Liberties Score (CL) by Population Size (ln)",
     x = "Log of Population (2022)",
     y = "Predicted Civil Liberties Score (CL) for 2022",
     color = "FH Status 2022") +
