@@ -121,7 +121,7 @@ modelC3 <- lm(fh$total_fh_2022 ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island
 
 modelC4 <- lm(fh$total_fh_2022 ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$communist, data = fh)
 
-stargazer(modelC1, modelC2, modelC3, modelC4, type = "text", title = "Pop_log_2022 (IV) - FH Total Score (DV) - OLS - CVs Benchmark")
+stargazer(modelA, modelC1, modelC2, modelC3, modelC4, type = "text", title = "Pop_log_2022 (IV) - FH Total Score (DV) - OLS - CVs Benchmark")
 modelC <- modelC4
 # Unlike V-dem Island_state has greater pos. effect and is more sig. On the other hand, diffusion variable has still positive effect, but
 # much less magnitude. I suspect this is due to the many small island states
@@ -277,7 +277,7 @@ modelFc <- polr(fh$`2022Status` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$islan
 
 modelFd <- polr(fh$`2022Status` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$communist, data = fh, Hess = TRUE)
 
-stargazer(modelFa, modelFb, modelFc, modelFd, type = "text", title= "DV (FH Status) & IV (Log Pop) with CVs Benchmark")
+stargazer(modelB, modelFa, modelFb, modelFc, modelFd, type = "text", title= "DV (FH Status) & IV (Log Pop) with CVs Benchmark")
 modelF <- modelFd
 
 
@@ -687,20 +687,20 @@ library(here)
 
 ## Saving with stargazer
 library(stargazer)
-# Save the table as a text file
+# Benchmark - table 1
 stargazer(model7, modelC, modelF, modelI, modelJ, modelK, modelL,
           type = "text", # Output format is text
-          out = here("Output", "Tables", "All_Benchmark_Stargazer.txt"), # Specify the output file name
+          out = here("Output", "Tables", "table1.txt"), # Specify the output file name
           title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - All Benchmark")
 
-# Extended 
+# Extended - table 3
 stargazer(model9, modelD, modelG, type = "text",
-          out = here("Output", "Tables", "All_Extended_Stargazer.txt"), # Specify the output file name
+          out = here("Output", "Tables", "table3.txt"), # Specify the output file name
           title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - CV Extended")
 
-# Maximal
+# Maximal - table 4
 stargazer(model10, modelE, modelH, type = "text",
-          out = here("Output", "Tables", "All_Maximal_Stargazer.txt"), # Specify the output file name
+          out = here("Output", "Tables", "table4.txt"), # Specify the output file name
           title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - CV Maximal")
 
 
@@ -717,7 +717,7 @@ stargazer(modelC, modelD, modelE,
           out = here("Output", "Tables", "FH_Total_All_Spec_Stargazer.txt"), # Specify the output file name
           title = "Pop_log_2022 (IV) - FH Total Score (DV) - All Model Specifications")
 
-# FH Status all model specifications
+# FH Status all model specifications 
 stargazer(modelF, modelG, modelH,
           type = "text", # Output format is text
           out = here("Output", "Tables", "FH_Status_All_Spec_Stargazer.txt"), # Specify the output file name
@@ -725,24 +725,40 @@ stargazer(modelF, modelG, modelH,
 
 
 # Categorical-IV Tests Summary FH & Vdem
+# Benchmark - table 2
 stargazer(model4, modelM, type = "text", 
           covariate.labels = c("Population (Small)", "Population (Large)", "Population (Huge)",
                                "GDPpc log 2022", "Island State", "Diffusion scaled", "Communist",
                                "Population (Small)", "Population (Large)", "Population (Huge)",
                                "GDPpc log 2022", "Island State", "Diffusion",  "Communist",
                                "Pop (Micro)/Intercept"),
-          out = here("Output", "Tables", "Pop_cat_IV_Stargazer.txt"), # Specify the output file name
+          out = here("Output", "Tables", "table2.txt"), # Specify the output file name
           title = "Pop_cat (IV) - DV: 2022 V_dem betareg() & FH Total Score (OLS) - CVs Benchmark")
 
+## For comparision, low count of Covariates
+# table 5
+stargazer(model3a, modelC1, modelC2, modelFa, modelFb, modelI1, modelI2,
+          type = "text", # Output format is text
+          out = here("Output", "Tables", "table5.txt"), 
+          title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - Few Covariates")
 
-## modelsummary
+# table 6
+stargazer(modelMa, modelMb, type = "text", 
+          covariate.labels = c("Population (Small)", "Population (Large)", "Population (Huge)",
+                               "GDPpc log 2022", "Island State",
+                               "Pop (Micro)/Intercept"),
+          out = here("Output", "Tables", "table6.txt"), # Specify the output file name
+          title = "Pop_cat (IV) - DV: 2022 FH Total Score (OLS) - Few Covariates")
+
+# Model summary -----------------------------------------------------------
+
 library(modelsummary)
 modelsummary(
- list("Model 1" = model7, "Model 2" = modelC, "Model 3" = modelF, 
-    "Model 4" = modelI, "Model 5" = modelJ, "Model 6" = modelK, "Model 7" = modelL),
-#output = here("Output", "Tables", "All_Benchmark_Tinytable.txt"),
-title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - All Benchmark",
-stars = TRUE)
+  list("Model 1" = model7, "Model 2" = modelC, "Model 3" = modelF, 
+       "Model 4" = modelI, "Model 5" = modelJ, "Model 6" = modelK, "Model 7" = modelL),
+  #output = here("Output", "Tables", "All_Benchmark_Tinytable.txt"),
+  title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - All Benchmark",
+  stars = TRUE)
 
 modelsummary(
   list("2022V_Dem_scaled" = model7, "total_fh_2022" = modelC, "2022Status" = modelF, 
@@ -757,5 +773,14 @@ modelsummary(
   title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - All Benchmark",
   stars = TRUE)
 
+modelsummary(
+  list("2022V_Dem" = model4, "total_fh_2022" = modelM),
+  #output = here("Output", "Tables", "Cat_Benchmark_Tinytable.txt"),
+  title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - All Benchmark",
+  stars = TRUE)
 
-
+modelsummary(
+  list("G" = modelG, "H" = modelH),
+  #output = here("Output", "Tables", "Cat_Benchmark_Tinytable.txt"),
+  title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - All Benchmark",
+  stars = TRUE)

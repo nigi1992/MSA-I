@@ -195,7 +195,7 @@ model3d <- betareg(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 + vdem$GDPpc_log_2022 + 
                      vdem$communist, data = vdem)
 summary(model3d)
 
-stargazer(model1_betareg, model3a, model3b, model3c, model3d, type = "text", 
+stargazer(model1, model3a, model3b, model3c, model3d, type = "text", 
           title = "Pop_log_2022 (IV) - V_Dem (DV) - betareg() - CVs Benchmark")
 model3 <- model3d
 # The coefficient for Pop_log_2022 is negative and statistically significant in all models. apart from 3.
