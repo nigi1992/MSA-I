@@ -398,3 +398,4 @@ str(df_fh_filtered)
 file_path_fh <- '/Users/nicolaswaser/New-project-GitHub-first/R/MSA I/Input Data/df_fh_filtered.csv'
 write.csv(df_fh_filtered, file_path_fh, row.names = FALSE)
 
+

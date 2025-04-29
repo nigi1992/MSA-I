@@ -374,6 +374,7 @@ pR2(modelH) # fit is good for a cat. model
 
 range(fh$`2022PR`) # There negative values. This could be a problem for OLS regression.
 fh$PR_2022_recoded <- ifelse(fh$`2022PR` < 0, 0, fh$`2022PR`) # Creating a new variable to avoid overwriting original
+# Three countries were impacted (China, South Sudan, Syria) and reassigned with a value of 0
 
 # Model I: DV (2022PR) & IV (Pop_log_2022) with CVs (Log GDP per Capita, island_state, diffusion variable, communist)
 modelI1 <- lm(fh$`2022PR` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 , data = fh)
@@ -784,3 +785,5 @@ modelsummary(
   #output = here("Output", "Tables", "Cat_Benchmark_Tinytable.txt"),
   title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - All Benchmark",
   stars = TRUE)
+
+

@@ -475,6 +475,7 @@ bptest(model3_scaled)  # Breusch-Pagan test
 
 
 # Testing Model4scaled ----------------------------------------------------
+
 # visual diagnostic plots
 autoplot(model4_scaled, which = 1:4, ncol = 2, label.id = NULL) +
   theme_bw()
@@ -487,6 +488,7 @@ vif(model4_scaled)   # Variance Inflation Factor, should be < 5 (preferably < 2.
 # 4. Formal test for homoscedasticity (constant variance)
 bptest(model4_scaled)  # Breusch-Pagan test
 # all test same as above!
+
 
 # Testing Model5scaled ----------------------------------------------------
 

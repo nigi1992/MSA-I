@@ -872,7 +872,6 @@ ggplot(control_values_modelK, aes(x = Pop_log_2022, y = predicted)) +
   theme(plot.title = element_text(hjust = 0.5))
 
 
-
 # 8. DAG ------------------------------------------------------------------
 
 install.packages("dagitty")
