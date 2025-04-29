@@ -896,7 +896,7 @@ Commu -> DemScore}"
 g <- dagitty(dag_text)
 ggdag(g, layout = "auto") + theme_dag_grey() + theme(legend.position = "right") +
   ggtitle("DAG of effect of Population Size on Democracy Score with Covariates")
-#ggsave(file = here("Output", "Plots", "simple dag.png"), width = 8, height = 6, dpi = 300)
+#ggsave(file = here("Output", "Plots", "DAGs", "simple dag.png"), width = 8, height = 6, dpi = 300)
 
 
 # Labeled DAG
@@ -928,7 +928,7 @@ ggdag(g_full, layout = "auto") +
   ggtitle("DAG of effect of Population Size on Democracy Score with Covariates") +
   #theme_dag() +
   theme(plot.title = element_text(hjust = 0.5)) # Center title
-ggsave(file = here("Output", "Plots", "dag blue label.png"), width = 12, height = 7, dpi = 300)
+ggsave(file = here("Output", "Plots", "DAGs", "dag blue label.png"), width = 12, height = 7, dpi = 300)
 
 
 # Plotting with blacked out nodes
@@ -943,7 +943,7 @@ ggdag(g_full, layout = "auto") +
   theme_dag_blank() +                      # Use a theme without axes/gridlines
   ggtitle("DAG of effect of Population Size on Democracy Score with Covariates") +
   theme(plot.title = element_text(hjust = 0.5)) # Center title 
-ggsave(file = here("Output", "Plots", "dag simple.png"), width = 10, height = 7, dpi = 300)
+ggsave(file = here("Output", "Plots", "DAGs", "dag simple.png"), width = 10, height = 7, dpi = 300)
 
 
 # 9. Descriptive Statistics - Plots -----------------------------------------------
@@ -1213,16 +1213,6 @@ summary(fh$lat_log)
 # 11. Descriptive Statistics - Correlation Plots ---------------------------
 
 # V-Dem
-# Correlation plot of V-Dem variables
-vdem_cor <- vdem %>%
-  select(`2022V_Dem`, `2022V_Dem_scaled`, ) %>%
-  cor(use = "pairwise.complete.obs")
-vdem_cor_plot <- ggcorrplot(vdem_cor, 
-                             method = "circle", 
-                             type = "lower", 
-                             lab = TRUE, 
-                             title = "Correlation Plot of V-Dem Variables (2022)", 
-                             colors = c("red", "white", "blue"), 
-                             ggtheme = theme_bw())
+# Correlation plot of predictor variables
 
 
