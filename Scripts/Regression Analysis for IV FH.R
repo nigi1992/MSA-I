@@ -269,6 +269,7 @@ bptest(modelE)  # Breusch-Pagan test
 # 6. Pop_log_2022 (IV) - FH Status (DV) - polr() - CVs Benchmark (GDPpc_log_2022, island_state, diffusion_2022, communist) -------------
 
 # Model F: DV (FH Status) & IV (Log Pop) with CVs Benchmark (Log GDP per Capita, island_state, diffusion variable, communist)
+
 modelFa <- polr(fh$`2022Status` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022, data = fh, Hess = TRUE)
 
 modelFb <- polr(fh$`2022Status` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state, data = fh, Hess = TRUE)
@@ -377,6 +378,8 @@ fh$PR_2022_recoded <- ifelse(fh$`2022PR` < 0, 0, fh$`2022PR`) # Creating a new v
 # Three countries were impacted (China, South Sudan, Syria) and reassigned with a value of 0
 
 # Model I: DV (2022PR) & IV (Pop_log_2022) with CVs (Log GDP per Capita, island_state, diffusion variable, communist)
+modelI0 <- lm(fh$`2022PR` ~ fh$Pop_log_2022, data = fh)
+
 modelI1 <- lm(fh$`2022PR` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 , data = fh)
 
 modelI2 <- lm(fh$`2022PR` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state, data = fh)
@@ -387,7 +390,7 @@ modelI4 <- lm(fh$`2022PR` ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_stat
 
 modelI5 <- lm(fh$PR_2022_recoded ~ fh$Pop_log_2022 + fh$GDPpc_log_2022 + fh$island_state + fh$diffusion_fh_2022 + fh$communist, data = fh)
 
-stargazer(modelI1, modelI2, modelI3, modelI4, modelI5, type = "text", title = "Pop_log_2022 (IV) - 2022PR (DV) - OLS - CVs Benchmark")
+stargazer(modelI0, modelI1, modelI2, modelI3, modelI4, modelI5, type = "text", title = "Pop_log_2022 (IV) - 2022PR (DV) - OLS - CVs Benchmark")
 modelI <- modelI5
 
 
@@ -553,6 +556,16 @@ pR2(modelL) # fit is good for a cat. model
 # 13. FH Total Score (DV) - Pop_cat_2022 (IV) - OLS - CVs Benchmark-------------------------------------------------------------------------
 
 # Model M: DV (FH Total Score) & IV (Pop_cat_2022) with CVs Benchmark (Log GDP per Capita, island_state, diffusion variable, communist)
+
+library(broom)
+contrasts(fh$Pop_cat_2022) <- contr.treatment(4)
+modelM0 <- lm(fh$total_fh_2022 ~ fh$Pop_cat_2022, data = fh)
+coef_tableA0 <- tidy(modelM0)
+kable(coef_tableA0, digits = 3)
+stargazer(modelM0, type = "text", 
+          covariate.labels = c("Population (Small)", "Population (Large)", 
+                               "Population (Huge)", "Pop (Micro)/Intercept"),
+          title = "DV (FH Total Score) & IV (Pop_cat_2022) no CVs")
 
 contrasts(fh$Pop_cat_2022) <- contr.treatment(4)
 
@@ -738,18 +751,25 @@ stargazer(model4, modelM, type = "text",
 
 ## For comparision, low count of Covariates
 # table 5
-stargazer(model3a, modelC1, modelC2, modelFa, modelFb, modelI1, modelI2,
+stargazer(model1, model3a, model3b, modelA, modelC1, modelC2,
           type = "text", # Output format is text
           out = here("Output", "Tables", "table5.txt"), 
-          title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - Few Covariates")
+          title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH & Vdem - No or Few Covariates")
 
 # table 6
-stargazer(modelMa, modelMb, type = "text", 
+stargazer(modelB, modelFa, modelFb, modelI0, modelI1, modelI2,
+          type = "text", # Output format is text
+          out = here("Output", "Tables", "table6.txt"), 
+          title = "Model Comparison - Pop_log_2022 (IV) - various DVs FH - No or Few Covariates")
+
+# table 7
+stargazer(modelM0, modelMa, modelMb, modelMc, modelMd, type = "text", 
           covariate.labels = c("Population (Small)", "Population (Large)", "Population (Huge)",
-                               "GDPpc log 2022", "Island State",
+                               "GDPpc log 2022", "Island State", "Diffusion", "Communist",
                                "Pop (Micro)/Intercept"),
-          out = here("Output", "Tables", "table6.txt"), # Specify the output file name
-          title = "Pop_cat (IV) - DV: 2022 FH Total Score (OLS) - Few Covariates")
+          out = here("Output", "Tables", "table7.txt"), # Specify the output file name
+          title = "Pop_cat (IV) - DV: 2022 FH Total Score (OLS) - No or Few Covariates")
+
 
 # Model summary -----------------------------------------------------------
 

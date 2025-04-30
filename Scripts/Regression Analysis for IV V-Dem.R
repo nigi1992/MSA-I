@@ -87,35 +87,32 @@ stargazer(model1_log, model1_betareg, model1_fractional, type = "text",
 
 # Adding fixed effects - felm() ----------------------------------------------------
 
-install.packages("lfe")
-library(lfe)
+#install.packages("lfe")
+#library(lfe)
 
-model1_felm <- felm(vdem$`2022V_Dem` ~ vdem$Pop_2022, data = vdem)
-summary(model1_felm)
+#model1_felm <- felm(vdem$`2022V_Dem` ~ vdem$Pop_2022, data = vdem)
+#summary(model1_felm)
 
-model1_felm_log <- felm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 | 0 |0 | iso3, data = vdem)
-summary(model1_felm)
+#model1_felm_log <- felm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 | 0 |0 | iso3, data = vdem)
+#summary(model1_felm)
 
-model1_felm_scale <- felm(vdem$`2022V_Dem` ~ scale(vdem$Pop_2022) | 0 |0 | iso3, data = vdem)
-summary(model1_felm_scale)
+#model1_felm_scale <- felm(vdem$`2022V_Dem` ~ scale(vdem$Pop_2022) | 0 |0 | iso3, data = vdem)
+#summary(model1_felm_scale)
 
-model1_felm_scale_fixed <- felm(vdem$`2022V_Dem` ~ scale(vdem$Pop_2022) | vdem$sub_region |0 | iso3, data = vdem)
-summary(model1_felm_scale_fixed)
+#model1_felm_scale_fixed <- felm(vdem$`2022V_Dem` ~ scale(vdem$Pop_2022) | vdem$sub_region |0 | iso3, data = vdem)
+#summary(model1_felm_scale_fixed)
 
-model1_felm_log_fixed <- felm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 | vdem$sub_region |0 | iso3, data = vdem)
-summary(model1_felm_log_fixed)
-
-#stargazer(model1_betareg, model1_felm_scale, model1_felm_scale_fixed, model1_felm_scale_fixed2, type = "text", 
-  #        title = "Simple Regression 2022: Pop (IV) - V_Dem (DV)")
+#model1_felm_log_fixed <- felm(vdem$`2022V_Dem` ~ vdem$Pop_log_2022 | vdem$sub_region |0 | iso3, data = vdem)
+#summary(model1_felm_log_fixed)
 
 # Alternative approach using lapply to work with a list of models
-models_list <- list(model1_betareg, model1_felm_log, model1_felm, model1_felm_scale, model1_felm_scale_fixed, model1_felm_log_fixed)
-valid_models <- models_list[sapply(models_list, function(x) !inherits(tryCatch(summary(x), error = function(e) e), "error"))]
+#models_list <- list(model1_betareg, model1_felm_log, model1_felm, model1_felm_scale, model1_felm_scale_fixed, model1_felm_log_fixed)
+#valid_models <- models_list[sapply(models_list, function(x) !inherits(tryCatch(summary(x), error = function(e) e), "error"))]
 
 # Using only valid models in stargazer
-stargazer(valid_models, 
-          type = "text", 
-          title = "Simple Regression 2022: Pop (IV) - V_Dem (DV)")
+#stargazer(valid_models, 
+      #    type = "text", 
+      #    title = "Simple Regression 2022: Pop (IV) - V_Dem (DV)")
 
 # 2. Cat_pop_2022 (IV) - V_Dem (DV) - Simple - polr() -------------
 table(vdem$Pop_cat_2022)
